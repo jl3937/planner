@@ -3,54 +3,28 @@ package com.appspot.planner;
 import java.util.Arrays;
 
 public class Message {
+  static public class Event {
+    public String content;
+    public int type;
+  }
 
-  public long startTime;
-  public long endTime;
-  public String startLoc;
-  public String endLoc;
-  public String[] events;
+  static public class Spec {
+    public long startTime;
+    public long endTime;
+    public String startLoc;
+    public String EndLoc;
+    public int price;
+    public int numberOfPeople;
+  }
+  
+  static public class Slot {
+    public Event event;
+    public Spec spec;
+  }
+
+  public Spec requirement;
+  public Event[] events;
+  public Slot[] schedule;
 
   public Message() {};
-
-  public Message(Message message) {
-    this.startTime = message.startTime;
-    this.endTime = message.endTime;
-    this.startLoc = message.startLoc;
-    this.endLoc = message.endLoc;
-    if (message.events != null) {
-      this.events = Arrays.copyOf(message.events, message.events.length);
-    }
-  };
-
-  public long getStartTime() {
-    return startTime;
-  }
-
-  public void setStartTime(long startTime) {
-    this.startTime = startTime;
-  }
-
-  public long getEndTime() {
-    return endTime;
-  }
-
-  public void setEndTime(long endTime) {
-    this.endTime = endTime;
-  }
-
-  public String getStartLoc() {
-    return startLoc;
-  }
-
-  public void setStartLoc(String startLoc) {
-    this.startLoc = startLoc;
-  }
-
-  public String getEndLoc() {
-    return endLoc;
-  }
-
-  public void setEndLoc(String endLoc) {
-    this.endLoc = endLoc;
-  }
 }

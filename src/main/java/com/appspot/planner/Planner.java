@@ -20,9 +20,20 @@ import javax.inject.Named;
     audiences = {Constants.ANDROID_AUDIENCE}
 )
 public class Planner {
+  YelpAPI yelpAPI;
+
+  public Planner() {
+    this.yelpAPI = new YelpAPI();
+  }
+
   @ApiMethod(name = "planner.get_plan", httpMethod = "post")
   public Message getPlan(Message request) {
-    Message response = new Message(request);
+    String result = this.yelpAPI.search("Sushi", "San Mateo, CA");
+    Message response = new Message();
+    response.schedule = new Message.Slot[1];
+    response.schedule[0] = new Message.Slot();
+    response.schedule[0].event = new Message.Event();
+    response.schedule[0].event.content = result;
     return response;
   }
 
