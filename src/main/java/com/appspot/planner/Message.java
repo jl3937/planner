@@ -1,6 +1,6 @@
 package com.appspot.planner;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 
 public class Message {
   static public class Event {
@@ -12,19 +12,26 @@ public class Message {
     public long startTime;
     public long endTime;
     public String startLoc;
-    public String EndLoc;
+    public String endLoc;
     public int price;
     public int numberOfPeople;
   }
   
-  static public class Slot {
+  static public class TimeSlot {
+    public TimeSlot() {
+      event = new Event();
+      spec = new Spec();
+    }
     public Event event;
     public Spec spec;
   }
 
   public Spec requirement;
-  public Event[] events;
-  public Slot[] schedule;
+  public ArrayList<Event> events;
+  public ArrayList<TimeSlot> schedule;
 
-  public Message() {};
+  public Message() {
+    events = new ArrayList<Event>();
+    schedule = new ArrayList<TimeSlot>();
+  };
 }

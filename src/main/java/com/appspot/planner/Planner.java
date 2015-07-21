@@ -1,5 +1,8 @@
 package com.appspot.planner;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.response.NotFoundException;
@@ -21,19 +24,47 @@ import javax.inject.Named;
 )
 public class Planner {
   YelpAPI yelpAPI;
+  GoogleGeoAPI googleGeoAPI;
 
   public Planner() {
     this.yelpAPI = new YelpAPI();
+    this.googleGeoAPI = new GoogleGeoAPI();
   }
 
   @ApiMethod(name = "planner.get_plan", httpMethod = "post")
   public Message getPlan(Message request) {
-    String result = this.yelpAPI.search("Sushi", "San Mateo, CA");
     Message response = new Message();
-    response.schedule = new Message.Slot[1];
-    response.schedule[0] = new Message.Slot();
-    response.schedule[0].event = new Message.Event();
-    response.schedule[0].event.content = result;
+    for (Message.Event event : request.events) {
+      JSONObject result = this.yelpAPI.search(event.content,
+                                              request.requirement.startLoc);
+      JSONArray businesses = (JSONArray) result.get("businesses");
+      JSONObject firstBusiness = (JSONObject) businesses.get(0);
+
+      JSONObject location = (JSONObject) firstBusiness.get("location");
+      JSONArray displayAddress = (JSONArray) location.get("display_address");
+      String eventLoc = "";
+      for (int i = 0; i < displayAddress.size(); ++i) {
+        eventLoc += displayAddress.get(i).toString() + " ";
+      }
+
+      JSONObject matrix = 
+          this.googleGeoAPI.getDuration(request.requirement.startLoc, eventLoc);
+      JSONArray rows = (JSONArray) matrix.get("rows");
+      JSONObject firstRow = (JSONObject) rows.get(0);
+      JSONArray elements = (JSONArray) firstRow.get("elements");
+      JSONObject firstElement = (JSONObject) elements.get(0);
+      JSONObject duration = (JSONObject) firstElement.get("duration");
+      Message.TimeSlot timeSlot = new Message.TimeSlot();
+      timeSlot.event.content = duration.get("text").toString();
+      timeSlot.spec.startLoc = request.requirement.startLoc;
+      timeSlot.spec.endLoc = eventLoc;
+      response.schedule.add(timeSlot);
+
+      timeSlot = new Message.TimeSlot();
+      timeSlot.event.content = firstBusiness.get("name").toString();
+      timeSlot.spec.startLoc = eventLoc;
+      response.schedule.add(timeSlot);
+    }
     return response;
   }
 

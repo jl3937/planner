@@ -1,5 +1,8 @@
 package com.appspot.planner;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
@@ -28,7 +31,7 @@ public class YelpAPI {
     this.accessToken = new Token(TOKEN, TOKEN_SECRET);
   }
 
-  public String search(String term, String location) {
+  public JSONObject search(String term, String location) {
     OAuthRequest request = new OAuthRequest(Verb.GET, YELP_API_URL);
     request.addQuerystringParameter("term", term);
     request.addQuerystringParameter("location", location);
@@ -36,9 +39,15 @@ public class YelpAPI {
     return sendRequestAndGetResponse(request);
   }
 
-  private String sendRequestAndGetResponse(OAuthRequest request) {
+  private JSONObject sendRequestAndGetResponse(OAuthRequest request) {
     this.service.signRequest(this.accessToken, request);
     Response response = request.send();
-    return response.getBody();
+    String responseString = response.getBody();
+    JSONParser parser = new JSONParser();
+    try {
+      return (JSONObject) parser.parse(responseString);
+    } catch (ParseException pe) {
+      return null;
+    }
   }
 }
