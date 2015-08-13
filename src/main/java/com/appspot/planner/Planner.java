@@ -35,17 +35,11 @@ public class Planner {
   public Message getPlan(Message request) {
     Message response = new Message();
     for (Message.Event event : request.events) {
-      JSONObject result = this.yelpAPI.search(event.content,
-                                              request.requirement.startLoc);
-      JSONArray businesses = (JSONArray) result.get("businesses");
-      JSONObject firstBusiness = (JSONObject) businesses.get(0);
-
-      JSONObject location = (JSONObject) firstBusiness.get("location");
-      JSONArray displayAddress = (JSONArray) location.get("display_address");
-      String eventLoc = "";
-      for (int i = 0; i < displayAddress.size(); ++i) {
-        eventLoc += displayAddress.get(i).toString() + " ";
-      }
+      JSONObject result = this.googleGeoAPI.searchPlace(
+          event.content, request.requirement.startLoc);
+      JSONArray results = (JSONArray) result.get("results");
+      JSONObject firstResult = (JSONObject) results.get(0);
+      String eventLoc = firstResult.get("formatted_address").toString();
 
       JSONObject matrix = 
           this.googleGeoAPI.getDuration(request.requirement.startLoc, eventLoc);
@@ -61,7 +55,7 @@ public class Planner {
       response.schedule.add(timeSlot);
 
       timeSlot = new Message.TimeSlot();
-      timeSlot.event.content = firstBusiness.get("name").toString();
+      timeSlot.event.content = firstResult.get("name").toString();
       timeSlot.spec.startLoc = eventLoc;
       response.schedule.add(timeSlot);
     }
