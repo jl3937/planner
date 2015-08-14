@@ -5,7 +5,15 @@ import java.util.ArrayList;
 public class Message {
   static public class Event {
     public String content;
-    public int type;
+    enum Type {
+      FOOD,
+      MOVIE
+    }
+    public Type type;
+
+    public Event() {
+      type = Type.FOOD;
+    }
   }
 
   static public class Spec {
