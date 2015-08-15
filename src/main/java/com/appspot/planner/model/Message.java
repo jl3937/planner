@@ -1,20 +1,16 @@
-package com.appspot.planner;
+package com.appspot.planner.model;
 
 import java.util.ArrayList;
 
 public class Message {
   static public class Event {
     public String content;
-    enum Type {
+    public enum Type {
       FOOD,
       MOVIE,
       TRANSPORT
     }
     public Type type;
-
-    public Event() {
-      type = Type.FOOD;
-    }
   }
 
   static public class Spec {
@@ -25,6 +21,13 @@ public class Message {
     public String endLoc;
     public int price;
     public int numberOfPeople;
+    public enum TravelMode {
+      DRIVING,
+      WALKING,
+      BICYCLING,
+      TRANSIT
+    }
+    public TravelMode travelMode;
   }
   
   static public class TimeSlot {

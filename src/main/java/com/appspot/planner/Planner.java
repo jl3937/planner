@@ -1,10 +1,9 @@
 package com.appspot.planner;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.jsoup.nodes.Document;
-
+import com.appspot.planner.model.DistanceMatrixResult;
+import com.appspot.planner.model.Message;
 import com.appspot.planner.model.Movie;
+import com.appspot.planner.model.PlaceResult;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.response.NotFoundException;
@@ -39,17 +38,21 @@ public class Planner {
   public Message getPlan(Message request) {
     Message response = new Message();
     String previousLoc = request.requirement.startLoc;
+    if (request.requirement.travelMode == null) {
+      request.requirement.travelMode = Message.Spec.TravelMode.DRIVING;
+    }
     for (Message.Event event : request.events) {
       String eventLoc = "";
       String eventContent = "";
       String eventLength = "";
+      if (event.type == null) {
+        event.type = Message.Event.Type.FOOD;
+      }
       if (event.type == Message.Event.Type.FOOD) {
-        JSONObject result = this.googleGeoAPI.searchPlace(event.content,
-                                                          previousLoc);
-        JSONArray results = (JSONArray) result.get("results");
-        JSONObject firstResult = (JSONObject) results.get(0);
-        eventLoc = firstResult.get("formatted_address").toString();
-        eventContent = firstResult.get("name").toString();
+        PlaceResult result = this.googleGeoAPI.searchPlace(event.content,
+                                                           previousLoc);
+        eventLoc = result.results.get(0).formattedAddress;
+        eventContent = result.results.get(0).name;
         eventLength = "1hr";
       } else if (event.type == Message.Event.Type.MOVIE) {
         Movie movie = this.googleMovieCrawler.searchMovie(event.content,
@@ -60,18 +63,18 @@ public class Planner {
         eventLength = movie.length;
       }
 
-      JSONObject matrix =  this.googleGeoAPI.getDuration(previousLoc, eventLoc);
-      JSONArray rows = (JSONArray) matrix.get("rows");
-      JSONObject firstRow = (JSONObject) rows.get(0);
-      JSONArray elements = (JSONArray) firstRow.get("elements");
-      JSONObject firstElement = (JSONObject) elements.get(0);
-      JSONObject duration = (JSONObject) firstElement.get("duration");
+      DistanceMatrixResult result = this.googleGeoAPI.getDuration(
+          previousLoc,
+          eventLoc,
+          request.requirement.travelMode.name().toLowerCase());
+      String duration = result.rows.get(0).elements.get(0).duration.text;
       
       Message.TimeSlot timeSlot = new Message.TimeSlot();
       timeSlot.event.type = Message.Event.Type.TRANSPORT;
       timeSlot.spec.startLoc = previousLoc;
       timeSlot.spec.endLoc = eventLoc;
-      timeSlot.spec.length = duration.get("text").toString();
+      timeSlot.spec.length = duration;
+      timeSlot.spec.travelMode = request.requirement.travelMode;
       response.schedule.add(timeSlot);
 
       timeSlot = new Message.TimeSlot();
@@ -86,18 +89,18 @@ public class Planner {
     if (request.requirement.endLoc == null) {
       request.requirement.endLoc = request.requirement.startLoc;
     }
-    JSONObject matrix = 
-        this.googleGeoAPI.getDuration(previousLoc, request.requirement.endLoc);
-    JSONArray rows = (JSONArray) matrix.get("rows");
-    JSONObject firstRow = (JSONObject) rows.get(0);
-    JSONArray elements = (JSONArray) firstRow.get("elements");
-    JSONObject firstElement = (JSONObject) elements.get(0);
-    JSONObject duration = (JSONObject) firstElement.get("duration");
+    DistanceMatrixResult result = this.googleGeoAPI.getDuration(
+        previousLoc,
+        request.requirement.endLoc,
+        request.requirement.travelMode.name().toLowerCase());
+    String duration = result.rows.get(0).elements.get(0).duration.text;
     
     Message.TimeSlot timeSlot = new Message.TimeSlot();
-    timeSlot.event.content = duration.get("text").toString();
+    timeSlot.event.type = Message.Event.Type.TRANSPORT;
     timeSlot.spec.startLoc = previousLoc;
     timeSlot.spec.endLoc = request.requirement.endLoc;
+    timeSlot.spec.length = duration;
+    timeSlot.spec.travelMode = request.requirement.travelMode;
     response.schedule.add(timeSlot);
 
     return response;
