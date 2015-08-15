@@ -42,6 +42,7 @@ public class Planner {
     for (Message.Event event : request.events) {
       String eventLoc = "";
       String eventContent = "";
+      String eventLength = "";
       if (event.type == Message.Event.Type.FOOD) {
         JSONObject result = this.googleGeoAPI.searchPlace(event.content,
                                                           previousLoc);
@@ -49,12 +50,14 @@ public class Planner {
         JSONObject firstResult = (JSONObject) results.get(0);
         eventLoc = firstResult.get("formatted_address").toString();
         eventContent = firstResult.get("name").toString();
+        eventLength = "1hr";
       } else if (event.type == Message.Event.Type.MOVIE) {
         Movie movie = this.googleMovieCrawler.searchMovie(event.content,
                                                           previousLoc).get(0);
         Movie.Theater theater = movie.theaters.get(0);
         eventLoc = theater.address;
         eventContent = theater.name;
+        eventLength = movie.length;
       }
 
       JSONObject matrix =  this.googleGeoAPI.getDuration(previousLoc, eventLoc);
@@ -65,14 +68,17 @@ public class Planner {
       JSONObject duration = (JSONObject) firstElement.get("duration");
       
       Message.TimeSlot timeSlot = new Message.TimeSlot();
-      timeSlot.event.content = duration.get("text").toString();
+      timeSlot.event.type = Message.Event.Type.TRANSPORT;
       timeSlot.spec.startLoc = previousLoc;
       timeSlot.spec.endLoc = eventLoc;
+      timeSlot.spec.length = duration.get("text").toString();
       response.schedule.add(timeSlot);
 
       timeSlot = new Message.TimeSlot();
-      timeSlot.spec.startLoc = eventLoc;
       timeSlot.event.content = eventContent;
+      timeSlot.event.type = event.type;
+      timeSlot.spec.startLoc = eventLoc;
+      timeSlot.spec.length = eventLength;
       response.schedule.add(timeSlot);
       previousLoc = eventLoc;
     }

@@ -7,7 +7,8 @@ public class Message {
     public String content;
     enum Type {
       FOOD,
-      MOVIE
+      MOVIE,
+      TRANSPORT
     }
     public Type type;
 
@@ -19,6 +20,7 @@ public class Message {
   static public class Spec {
     public long startTime;
     public long endTime;
+    public String length;
     public String startLoc;
     public String endLoc;
     public int price;

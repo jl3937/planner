@@ -41,32 +41,38 @@ public class GoogleMovieCrawler {
     for (Element movieEl : movieEls) {
       Movie movie = new Movie();
       movie.length =
-          movieEl.getElementsByClass("info").get(1).html().split(" - ")[0];
+        movieEl.getElementsByClass("info").get(1).html().split(" - ")[0];
       Elements theaterEls = movieEl.getElementsByClass("theater");
       for (Element theaterEl : theaterEls) {
         Movie.Theater theater = new Movie.Theater();
         theater.name =
-            theaterEl.getElementsByClass("name").first().child(0).html();
+          theaterEl.getElementsByClass("name").first().child(0).html();
         theater.address =
-            theaterEl.getElementsByClass("address").first().html();
+          theaterEl.getElementsByClass("address").first().html();
         Element timesEl = theaterEl.getElementsByClass("times").first();
         int amIndex = -1, pmIndex = -1;
-        int i = 0;
+        int index = 0;
         for (Element timeEl : timesEl.children()) {
           String time = timeEl.ownText();
           if (time.endsWith("am")) {
-            amIndex = i;
+            amIndex = index;
           } else if (time.endsWith("pm")) {
-            pmIndex = i;
+            pmIndex = index;
           }
           theater.times.add(time);
-          ++i;
+          ++index;
+        }
+        for (int i = 0; i < amIndex; ++i) {
+          theater.times.set(i, theater.times.get(i) + "am");
+        }
+        for (int i = amIndex + 1; i < pmIndex; ++i) {
+          theater.times.set(i, theater.times.get(i) + "pm");
         }
         movie.theaters.add(theater);
       }
       movies.add(movie);
     }
-    
+
     return movies;
   }
 }
