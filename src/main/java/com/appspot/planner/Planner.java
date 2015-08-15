@@ -4,6 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.jsoup.nodes.Document;
 
+import com.appspot.planner.model.Movie;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.response.NotFoundException;
@@ -49,8 +50,11 @@ public class Planner {
         eventLoc = firstResult.get("formatted_address").toString();
         eventContent = firstResult.get("name").toString();
       } else if (event.type == Message.Event.Type.MOVIE) {
-        Document doc = this.googleMovieCrawler.searchMovie(event.content,
-                                                           previousLoc);
+        Movie movie = this.googleMovieCrawler.searchMovie(event.content,
+                                                          previousLoc).get(0);
+        Movie.Theater theater = movie.theaters.get(0);
+        eventLoc = theater.address;
+        eventContent = theater.name;
       }
 
       JSONObject matrix =  this.googleGeoAPI.getDuration(previousLoc, eventLoc);
