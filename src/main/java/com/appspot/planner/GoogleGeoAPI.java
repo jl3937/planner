@@ -1,6 +1,7 @@
 package com.appspot.planner;
 
 import com.appspot.planner.model.DistanceMatrixResult;
+import com.appspot.planner.model.PlaceDetailResult;
 import com.appspot.planner.model.PlaceResult;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -32,7 +33,11 @@ public class GoogleGeoAPI {
                                           String mode) {
     String json = "";
     try {
-      URL url = new URL(DISTANCE_MATRIX_API_URL + "?origins=" + URLEncoder.encode(origin) + "&destinations=" + URLEncoder.encode(destination) + "&mode=" + mode + "&key=" + API_KEY);
+      URL url = new URL(DISTANCE_MATRIX_API_URL +
+          "?origins=" + URLEncoder.encode(origin) +
+          "&destinations=" + URLEncoder.encode(destination) +
+          "&mode=" + mode +
+          "&key=" + API_KEY);
       BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
       String line = "";
       while (true) {
@@ -54,7 +59,9 @@ public class GoogleGeoAPI {
   public PlaceResult searchPlace(String keyword, String location) {
     String json = "";
     try {
-      URL url = new URL(PLACE_API_URL + "?query=" + URLEncoder.encode(keyword) + "+near+" + URLEncoder.encode(location) + "&key=" + API_KEY);
+      URL url = new URL(PLACE_API_URL +
+          "?query=" + URLEncoder.encode(keyword) + "+near+" + URLEncoder.encode(location) +
+          "&key=" + API_KEY);
       BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
       String line = "";
       while (true) {
@@ -69,6 +76,28 @@ public class GoogleGeoAPI {
     } catch (IOException e) {
     }
     PlaceResult result = new PlaceResult();
+    result = this.gson.fromJson(json, result.getClass());
+    return result;
+  }
+
+  public PlaceDetailResult getPlaceDetail(String placeId) {
+    String json = "";
+    try {
+      URL url = new URL(PLACE_DETAIL_API_URL + "?placeid=" + placeId + "&key=" + API_KEY);
+      BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+      String line = "";
+      while (true) {
+        line = reader.readLine();
+        if (line == null) {
+          break;
+        }
+        json += line + "\n";
+      }
+      reader.close();
+    } catch (MalformedURLException e) {
+    } catch (IOException e) {
+    }
+    PlaceDetailResult result = new PlaceDetailResult();
     result = this.gson.fromJson(json, result.getClass());
     return result;
   }

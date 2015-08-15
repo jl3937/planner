@@ -3,6 +3,7 @@ package com.appspot.planner;
 import com.appspot.planner.model.DistanceMatrixResult;
 import com.appspot.planner.model.Message;
 import com.appspot.planner.model.Movie;
+import com.appspot.planner.model.PlaceDetailResult;
 import com.appspot.planner.model.PlaceResult;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
@@ -49,11 +50,19 @@ public class Planner {
         event.type = Message.Event.Type.FOOD;
       }
       if (event.type == Message.Event.Type.FOOD) {
-        PlaceResult result = this.googleGeoAPI.searchPlace(event.content,
-                                                           previousLoc);
-        eventLoc = result.results.get(0).formattedAddress;
-        eventContent = result.results.get(0).name;
-        eventLength = "1hr";
+        PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.content,
+                                                                previousLoc);
+        for (PlaceResult.Result result : placeResult.results) {
+          if (result.openingHours.openNow == true) {
+            String placeId = result.placeId;
+            PlaceDetailResult placeDetailResult =
+                this.googleGeoAPI.getPlaceDetail(placeId);
+            eventLoc = result.formattedAddress;
+            eventContent = result.name;
+            eventLength = "1hr";
+            break;
+          }
+        }
       } else if (event.type == Message.Event.Type.MOVIE) {
         Movie movie = this.googleMovieCrawler.searchMovie(event.content,
                                                           previousLoc).get(0);

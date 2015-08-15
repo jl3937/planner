@@ -3,7 +3,6 @@ package com.appspot.planner.model;
 import java.util.ArrayList;
 
 public class PlaceResult {
-  public ArrayList<String> htmlAttributions;
   static public class Result {
     public String formattedAddress;
     static public class Geometry {
