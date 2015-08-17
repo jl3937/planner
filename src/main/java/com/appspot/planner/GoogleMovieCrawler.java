@@ -31,7 +31,7 @@ public class GoogleMovieCrawler {
         theater.name =
           theaterEl.getElementsByClass("name").first().child(0).html();
         theater.address =
-          theaterEl.getElementsByClass("address").first().html();
+          theaterEl.getElementsByClass("address").first().ownText();
         Element timesEl = theaterEl.getElementsByClass("times").first();
         int amIndex = -1, pmIndex = -1;
         int index = 0;

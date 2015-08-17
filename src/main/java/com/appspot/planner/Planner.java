@@ -25,12 +25,10 @@ import javax.inject.Named;
     audiences = {Constants.ANDROID_AUDIENCE}
 )
 public class Planner {
-  YelpAPI yelpAPI;
   GoogleGeoAPI googleGeoAPI;
   GoogleMovieCrawler googleMovieCrawler;
 
   public Planner() {
-    this.yelpAPI = new YelpAPI();
     this.googleGeoAPI = new GoogleGeoAPI();
     this.googleMovieCrawler = new GoogleMovieCrawler();
   }
@@ -53,7 +51,8 @@ public class Planner {
         PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.content,
                                                                 previousLoc);
         for (PlaceResult.Result result : placeResult.results) {
-          if (result.openingHours.openNow == true) {
+          if (result.openingHours == null ||
+              result.openingHours.openNow == true) {
             String placeId = result.placeId;
             PlaceDetailResult placeDetailResult =
                 this.googleGeoAPI.getPlaceDetail(placeId);
