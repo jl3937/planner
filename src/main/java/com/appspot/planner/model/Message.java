@@ -37,6 +37,7 @@ public class Message {
     }
     public Event event;
     public Spec spec;
+    public PlaceDetailResult placeDetailResult;
   }
 
   public Spec requirement;

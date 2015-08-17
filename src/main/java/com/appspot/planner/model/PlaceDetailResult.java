@@ -4,7 +4,21 @@ import java.util.ArrayList;
 
 public class PlaceDetailResult {
   static public class Result {
+    public String formattedAddress;
     public String formattedPhoneNumber;
+    public static class Geometry {
+      public static class Location {
+        public String lat;
+        public String lng;
+      }
+      public Location location;
+    }
+    public Geometry geometry;
+    public String icon;
+    public String internationalPhoneNumber;
+    public String name;
+    public int priceLevel;
+    public double rating;
     static public class OpeningHours {
       public boolean openNow;
       static public class Period {
@@ -33,6 +47,7 @@ public class PlaceDetailResult {
       public long time;
     }
     public ArrayList<Review> reviews;
+    public ArrayList<String> types;
     public String url;
     public int userRatingsTotal;
     public String website;

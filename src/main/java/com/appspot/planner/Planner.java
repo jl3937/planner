@@ -47,6 +47,7 @@ public class Planner {
       if (event.type == null) {
         event.type = Message.Event.Type.FOOD;
       }
+      PlaceDetailResult placeDetailResult = null;
       if (event.type == Message.Event.Type.FOOD) {
         PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.content,
                                                                 previousLoc);
@@ -54,8 +55,7 @@ public class Planner {
           if (result.openingHours == null ||
               result.openingHours.openNow == true) {
             String placeId = result.placeId;
-            PlaceDetailResult placeDetailResult =
-                this.googleGeoAPI.getPlaceDetail(placeId);
+            placeDetailResult = this.googleGeoAPI.getPlaceDetail(placeId);
             eventLoc = result.formattedAddress;
             eventContent = result.name;
             eventLength = "1hr";
@@ -90,7 +90,9 @@ public class Planner {
       timeSlot.event.type = event.type;
       timeSlot.spec.startLoc = eventLoc;
       timeSlot.spec.length = eventLength;
+      timeSlot.placeDetailResult = placeDetailResult;
       response.schedule.add(timeSlot);
+
       previousLoc = eventLoc;
     }
 
