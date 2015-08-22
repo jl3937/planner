@@ -8,6 +8,7 @@ import com.google.appengine.api.users.User;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 import java.util.Date;
 
 import javax.inject.Named;
@@ -67,7 +68,8 @@ public class Planner {
             selectedPlace = this.googleGeoAPI.getPlaceDetail(placeId).result;
             eventLoc = result.formattedAddress;
             eventContent = result.name;
-            duration = Constants.FOOD_TIME_IN_SECOND * Constants.MILLI_PER_SECOND;
+            duration = TimeUnit.MILLISECONDS.convert(
+                Constants.FOOD_TIME_IN_SECOND, TimeUnit.SECONDS);
             break;
           }
         }
@@ -99,7 +101,8 @@ public class Planner {
       TimeSlot timeSlot = new TimeSlot();
       timeSlot.event.type = Event.Type.TRANSPORT;
       timeSlot.spec.startTime = time;
-      time += selectedTransit.duration.value * Constants.MILLI_PER_SECOND;
+      time += TimeUnit.MILLISECONDS.convert(selectedTransit.duration.value,
+                                            TimeUnit.SECONDS);
       timeSlot.spec.endTime = time;
       timeSlot.spec.startLoc = previousLoc;
       timeSlot.spec.endLoc = eventLoc;
@@ -138,7 +141,8 @@ public class Planner {
     TimeSlot timeSlot = new TimeSlot();
     timeSlot.event.type = Event.Type.TRANSPORT;
     timeSlot.spec.startTime = time;
-    time += selectedTransit.duration.value * Constants.MILLI_PER_SECOND;
+    time += TimeUnit.MILLISECONDS.convert(selectedTransit.duration.value,
+                                          TimeUnit.SECONDS);
     timeSlot.spec.endTime = time;
     timeSlot.spec.startLoc = previousLoc;
     timeSlot.spec.endLoc = request.requirement.endLoc;

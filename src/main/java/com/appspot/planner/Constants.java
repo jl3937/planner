@@ -14,6 +14,5 @@ public class Constants {
 
   public static final String API_KEY = "AIzaSyAD6lYA1_7oUGMAPkRJ3duNIlPRuzohvNw";
 
-  public static final long MILLI_PER_SECOND = 1000;
-  public static final long FOOD_TIME_IN_SECOND = 1000;
+  public static final long FOOD_TIME_IN_SECOND = 3600;
 }
