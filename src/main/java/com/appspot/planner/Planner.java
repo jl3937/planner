@@ -1,10 +1,6 @@
 package com.appspot.planner;
 
-import com.appspot.planner.model.DistanceMatrixResult;
-import com.appspot.planner.model.Message;
-import com.appspot.planner.model.Movie;
-import com.appspot.planner.model.PlaceDetailResult;
-import com.appspot.planner.model.PlaceResult;
+import com.appspot.planner.model.*;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.response.NotFoundException;
@@ -34,63 +30,70 @@ public class Planner {
   }
 
   @ApiMethod(name = "planner.get_plan", httpMethod = "post")
-  public Message getPlan(Message request) {
-    Message response = new Message();
+  public Plan getPlan(GetPlanRequest request) {
+    Plan response = new Plan();
     String previousLoc = request.requirement.startLoc;
     if (request.requirement.travelMode == null) {
-      request.requirement.travelMode = Message.Spec.TravelMode.DRIVING;
+      request.requirement.travelMode = Spec.TravelMode.DRIVING;
     }
-    for (Message.Event event : request.events) {
+    for (Event event : request.events) {
       String eventLoc = "";
       String eventContent = "";
       String eventLength = "";
       if (event.type == null) {
-        event.type = Message.Event.Type.FOOD;
+        event.type = Event.Type.FOOD;
       }
-      PlaceDetailResult placeDetailResult = null;
-      if (event.type == Message.Event.Type.FOOD) {
+      Place selectedPlace = null;
+      Movie selectedMovie = null;
+      if (event.type == Event.Type.FOOD) {
         PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.content,
                                                                 previousLoc);
         for (PlaceResult.Result result : placeResult.results) {
           if (result.openingHours == null ||
               result.openingHours.openNow == true) {
             String placeId = result.placeId;
-            placeDetailResult = this.googleGeoAPI.getPlaceDetail(placeId);
+            selectedPlace = this.googleGeoAPI.getPlaceDetail(placeId).result;
             eventLoc = result.formattedAddress;
             eventContent = result.name;
-            eventLength = "1hr";
             break;
           }
         }
-      } else if (event.type == Message.Event.Type.MOVIE) {
-        Movie movie = this.googleMovieCrawler.searchMovie(event.content,
-                                                          previousLoc).get(0);
-        Movie.Theater theater = movie.theaters.get(0);
-        eventLoc = theater.address;
-        eventContent = theater.name;
-        eventLength = movie.length;
+      } else if (event.type == Event.Type.MOVIE) {
+        ArrayList<Movie> movieResults =
+            this.googleMovieCrawler.searchMovie(event.content, previousLoc);
+        for (Movie movie : movieResults) {
+          Movie.Theater theater = movie.theaters.get(0);
+          eventLoc = theater.address;
+          eventContent = theater.name;
+          selectedMovie = movie;
+          break;
+        }
       }
 
       DistanceMatrixResult result = this.googleGeoAPI.getDuration(
           previousLoc,
           eventLoc,
           request.requirement.travelMode.name().toLowerCase());
-      String duration = result.rows.get(0).elements.get(0).duration.text;
+      Transit selectedTransit = null;
+      for (Transit transit : result.rows.get(0).elements) {
+        selectedTransit = transit;
+        break;
+      }
       
-      Message.TimeSlot timeSlot = new Message.TimeSlot();
-      timeSlot.event.type = Message.Event.Type.TRANSPORT;
+      TimeSlot timeSlot = new TimeSlot();
+      timeSlot.event.type = Event.Type.TRANSPORT;
       timeSlot.spec.startLoc = previousLoc;
       timeSlot.spec.endLoc = eventLoc;
-      timeSlot.spec.length = duration;
       timeSlot.spec.travelMode = request.requirement.travelMode;
+      timeSlot.transit = selectedTransit;
       response.schedule.add(timeSlot);
 
-      timeSlot = new Message.TimeSlot();
+      timeSlot = new TimeSlot();
       timeSlot.event.content = eventContent;
       timeSlot.event.type = event.type;
       timeSlot.spec.startLoc = eventLoc;
-      timeSlot.spec.length = eventLength;
-      timeSlot.placeDetailResult = placeDetailResult;
+      timeSlot.place = selectedPlace;
+      timeSlot.movie = selectedMovie;
       response.schedule.add(timeSlot);
 
       previousLoc = eventLoc;
@@ -103,22 +106,20 @@ public class Planner {
         previousLoc,
         request.requirement.endLoc,
         request.requirement.travelMode.name().toLowerCase());
-    String duration = result.rows.get(0).elements.get(0).duration.text;
-    
-    Message.TimeSlot timeSlot = new Message.TimeSlot();
-    timeSlot.event.type = Message.Event.Type.TRANSPORT;
+    Transit selectedTransit = null;
+    for (Transit transit : result.rows.get(0).elements) {
+      selectedTransit = transit;
+      break;
+    }
+
+    TimeSlot timeSlot = new TimeSlot();
+    timeSlot.event.type = Event.Type.TRANSPORT;
     timeSlot.spec.startLoc = previousLoc;
     timeSlot.spec.endLoc = request.requirement.endLoc;
-    timeSlot.spec.length = duration;
     timeSlot.spec.travelMode = request.requirement.travelMode;
+    timeSlot.transit = selectedTransit;
     response.schedule.add(timeSlot);
 
-    return response;
-  }
-
-  @ApiMethod(name = "planner.authed", path = "planner/authed")
-  public Message authedPlanner(User user) {
-    Message response = new Message();
     return response;
   }
 }

@@ -7,20 +7,7 @@ public class DistanceMatrixResult {
   public ArrayList<String> originAddresses;
   public ArrayList<String> destinationAddresses;
   static public class Row {
-    static public class Element {
-      public String status;
-      static public class Duration {
-        public int value;
-        public String text;
-      }
-      public Duration duration;
-      static public class Distance {
-        public int value;
-        public String text;
-      }
-      public Distance distance;
-    }
-    public ArrayList<Element> elements;
+    public ArrayList<Transit> elements;
   }
   public ArrayList<Row> rows;
 }
