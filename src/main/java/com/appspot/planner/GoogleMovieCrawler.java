@@ -4,6 +4,9 @@ import com.appspot.planner.model.Movie;
 import com.appspot.planner.util.UrlFetcher;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -11,6 +14,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 public class GoogleMovieCrawler {
+  private Pattern durationPattern = Pattern.compile("(\\d+)hr\\s+(\\d+)min");
   private static final String GOOGLE_MOVIE_URL = "http://www.google.com/movies";
   public GoogleMovieCrawler() {}
   public ArrayList<Movie> searchMovie(String name, String loc) {
@@ -23,8 +27,9 @@ public class GoogleMovieCrawler {
     ArrayList<Movie> movies = new ArrayList<Movie>();
     for (Element movieEl : movieEls) {
       Movie movie = new Movie();
-      movie.length =
+      movie.duration.text =
         movieEl.getElementsByClass("info").get(1).html().split(" - ")[0];
+      movie.duration.value = parseDuration(movie.duration.text);
       Elements theaterEls = movieEl.getElementsByClass("theater");
       for (Element theaterEl : theaterEls) {
         Movie.Theater theater = new Movie.Theater();
@@ -63,5 +68,17 @@ public class GoogleMovieCrawler {
     }
 
     return movies;
+  }
+
+  private long parseDuration(String text) {
+    long milliseconds = 0;
+    Matcher matcher = durationPattern.matcher(text);
+    if (matcher.find() && matcher.groupCount() == 2) {
+      int hours = Integer.parseInt(matcher.group(1));
+      milliseconds += TimeUnit.MILLISECONDS.convert(hours, TimeUnit.HOURS);
+      int minutes = Integer.parseInt(matcher.group(2));
+      milliseconds += TimeUnit.MILLISECONDS.convert(minutes, TimeUnit.MINUTES);
+    }
+    return milliseconds;
   }
 }

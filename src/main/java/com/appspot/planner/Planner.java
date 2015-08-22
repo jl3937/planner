@@ -7,6 +7,8 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.google.appengine.api.users.User;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.inject.Named;
 
@@ -23,10 +25,12 @@ import javax.inject.Named;
 public class Planner {
   GoogleGeoAPI googleGeoAPI;
   GoogleMovieCrawler googleMovieCrawler;
+  Calendar calendar;
 
   public Planner() {
     this.googleGeoAPI = new GoogleGeoAPI();
     this.googleMovieCrawler = new GoogleMovieCrawler();
+    this.calendar = Calendar.getInstance();
   }
 
   @ApiMethod(name = "planner.get_plan", httpMethod = "post")
@@ -35,6 +39,13 @@ public class Planner {
     String previousLoc = request.requirement.startLoc;
     if (request.requirement.travelMode == null) {
       request.requirement.travelMode = Spec.TravelMode.DRIVING;
+    }
+
+    long time = 0;
+    if (request.requirement.startTime != 0) {
+      time = this.calendar.getTime().getTime();
+    } else {
+      time = request.requirement.startTime;
     }
     for (Event event : request.events) {
       String eventLoc = "";
@@ -45,6 +56,7 @@ public class Planner {
       }
       Place selectedPlace = null;
       Movie selectedMovie = null;
+      long duration = 0;
       if (event.type == Event.Type.FOOD) {
         PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.content,
                                                                 previousLoc);
@@ -55,6 +67,7 @@ public class Planner {
             selectedPlace = this.googleGeoAPI.getPlaceDetail(placeId).result;
             eventLoc = result.formattedAddress;
             eventContent = result.name;
+            duration = Constants.FOOD_TIME_IN_SECOND * Constants.MILLI_PER_SECOND;
             break;
           }
         }
@@ -68,6 +81,7 @@ public class Planner {
           eventLoc = theater.address;
           eventContent = theater.name;
           selectedMovie = movie;
+          duration = movie.duration.value;
           break;
         }
       }
@@ -84,6 +98,9 @@ public class Planner {
       
       TimeSlot timeSlot = new TimeSlot();
       timeSlot.event.type = Event.Type.TRANSPORT;
+      timeSlot.spec.startTime = time;
+      time += selectedTransit.duration.value * Constants.MILLI_PER_SECOND;
+      timeSlot.spec.endTime = time;
       timeSlot.spec.startLoc = previousLoc;
       timeSlot.spec.endLoc = eventLoc;
       timeSlot.spec.travelMode = request.requirement.travelMode;
@@ -93,7 +110,11 @@ public class Planner {
       timeSlot = new TimeSlot();
       timeSlot.event.content = eventContent;
       timeSlot.event.type = event.type;
+      timeSlot.spec.startTime = time;
+      time += duration;
+      timeSlot.spec.startTime = time;
       timeSlot.spec.startLoc = eventLoc;
+      timeSlot.spec.endLoc = eventLoc;
       timeSlot.place = selectedPlace;
       timeSlot.movie = selectedMovie;
       response.schedule.add(timeSlot);
@@ -116,6 +137,9 @@ public class Planner {
 
     TimeSlot timeSlot = new TimeSlot();
     timeSlot.event.type = Event.Type.TRANSPORT;
+    timeSlot.spec.startTime = time;
+    time += selectedTransit.duration.value * Constants.MILLI_PER_SECOND;
+    timeSlot.spec.endTime = time;
     timeSlot.spec.startLoc = previousLoc;
     timeSlot.spec.endLoc = request.requirement.endLoc;
     timeSlot.spec.travelMode = request.requirement.travelMode;

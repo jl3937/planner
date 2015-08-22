@@ -3,7 +3,7 @@ package com.appspot.planner.model;
 import java.util.ArrayList;
 
 public class Movie {
-  public String length;
+  public Duration duration;
   static public class Theater {
     public String name;
     public String address;
@@ -15,6 +15,7 @@ public class Movie {
   public ArrayList<Theater> theaters;
   public Theater theater;
   public Movie() {
+    duration = new Duration();
     theaters = new ArrayList<Theater>();
   }
 }
