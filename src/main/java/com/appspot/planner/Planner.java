@@ -6,10 +6,12 @@ import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.appengine.api.users.User;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 import java.util.Date;
+import java.util.TimeZone;
 
 import javax.inject.Named;
 
@@ -43,10 +45,10 @@ public class Planner {
     }
 
     long time = 0;
-    if (request.requirement.startTime != 0) {
+    if (request.requirement.startTime.value <= 0) {
       time = this.calendar.getTime().getTime();
     } else {
-      time = request.requirement.startTime;
+      time = request.requirement.startTime.value;
     }
     for (Event event : request.events) {
       String eventLoc = "";
@@ -100,10 +102,12 @@ public class Planner {
       
       TimeSlot timeSlot = new TimeSlot();
       timeSlot.event.type = Event.Type.TRANSPORT;
-      timeSlot.spec.startTime = time;
+      timeSlot.spec.startTime.value = time;
+      timeSlot.spec.startTime.text = timeToString(time);
       time += TimeUnit.MILLISECONDS.convert(selectedTransit.duration.value,
                                             TimeUnit.SECONDS);
-      timeSlot.spec.endTime = time;
+      timeSlot.spec.endTime.value = time;
+      timeSlot.spec.endTime.text = timeToString(time);
       timeSlot.spec.startLoc = previousLoc;
       timeSlot.spec.endLoc = eventLoc;
       timeSlot.spec.travelMode = request.requirement.travelMode;
@@ -113,9 +117,11 @@ public class Planner {
       timeSlot = new TimeSlot();
       timeSlot.event.content = eventContent;
       timeSlot.event.type = event.type;
-      timeSlot.spec.startTime = time;
+      timeSlot.spec.startTime.value = time;
+      timeSlot.spec.startTime.text = timeToString(time);
       time += duration;
-      timeSlot.spec.startTime = time;
+      timeSlot.spec.endTime.value = time;
+      timeSlot.spec.endTime.text = timeToString(time);
       timeSlot.spec.startLoc = eventLoc;
       timeSlot.spec.endLoc = eventLoc;
       timeSlot.place = selectedPlace;
@@ -140,10 +146,12 @@ public class Planner {
 
     TimeSlot timeSlot = new TimeSlot();
     timeSlot.event.type = Event.Type.TRANSPORT;
-    timeSlot.spec.startTime = time;
+    timeSlot.spec.startTime.value = time;
+    timeSlot.spec.startTime.text = timeToString(time);
     time += TimeUnit.MILLISECONDS.convert(selectedTransit.duration.value,
                                           TimeUnit.SECONDS);
-    timeSlot.spec.endTime = time;
+    timeSlot.spec.endTime.value = time;
+    timeSlot.spec.endTime.text = timeToString(time);
     timeSlot.spec.startLoc = previousLoc;
     timeSlot.spec.endLoc = request.requirement.endLoc;
     timeSlot.spec.travelMode = request.requirement.travelMode;
@@ -151,5 +159,14 @@ public class Planner {
     response.schedule.add(timeSlot);
 
     return response;
+  }
+
+  private String timeToString(long timestamp) {
+    SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd HH:mm");
+    TimeZone timeZone = TimeZone.getTimeZone("PST");
+    dateFormat.setTimeZone(timeZone);
+    Date date = new Date();
+    date.setTime(timestamp);
+    return dateFormat.format(date);
   }
 }

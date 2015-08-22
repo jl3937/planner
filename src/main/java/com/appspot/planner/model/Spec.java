@@ -4,8 +4,12 @@ import java.util.ArrayList;
 
 public class Spec {
   // Time in milliseconds.
-  public long startTime;
-  public long endTime;
+  static public class Time {
+    public long value;
+    public String text;
+  }
+  public Time startTime;
+  public Time endTime;
 
   public String startLoc;
   public String endLoc;
@@ -19,4 +23,8 @@ public class Spec {
     TRANSIT
   }
   public TravelMode travelMode;
+  public Spec() {
+    startTime = new Time();
+    endTime = new Time();
+  }
 }
