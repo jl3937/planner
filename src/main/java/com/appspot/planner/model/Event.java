@@ -1,6 +1,6 @@
 package com.appspot.planner.model;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class Event {
   public String content;
@@ -11,5 +11,5 @@ public class Event {
   }
   public Type type;
   public Spec requirement;
-  public ArrayList<String> avoid;
+  public List<String> avoid;
 }

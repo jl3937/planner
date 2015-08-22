@@ -1,8 +1,8 @@
 package com.appspot.planner.model;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class GetPlanRequest {
   public Spec requirement;
-  public ArrayList<Event> events;
+  public List<Event> events;
 }

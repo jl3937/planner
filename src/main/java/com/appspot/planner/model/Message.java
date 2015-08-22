@@ -1,6 +1,7 @@
 package com.appspot.planner.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Message {
   static public class Event {
@@ -41,11 +42,11 @@ public class Message {
   }
 
   public Spec requirement;
-  public ArrayList<Event> events;
-  public ArrayList<TimeSlot> schedule;
+  public List<Event> events;
+  public List<TimeSlot> schedule;
 
   public Message() {
-    events = new ArrayList<Event>();
-    schedule = new ArrayList<TimeSlot>();
+    events = new ArrayList<>();
+    schedule = new ArrayList<>();
   };
 }

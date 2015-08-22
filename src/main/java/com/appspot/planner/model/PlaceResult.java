@@ -1,6 +1,6 @@
 package com.appspot.planner.model;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class PlaceResult {
   static public class Result {
@@ -16,13 +16,14 @@ public class PlaceResult {
     public String name;
     static public class OpeningHours {
       public boolean openNow;
-      public ArrayList<String> weekdayText;
+      public List<String> weekdayText;
     }
     public OpeningHours openingHours;
     public String placeId;
     public int priceLevel;
     public double rating;
-    public ArrayList<String> types;
+    public List<String> types;
   }
-  public ArrayList<Result> results;
+
+  public List<Result> results;
 }

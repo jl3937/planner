@@ -1,6 +1,6 @@
 package com.appspot.planner.model;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class Place {
   public String formattedAddress;
@@ -28,8 +28,9 @@ public class Place {
       public DayTime close;
       public DayTime open;
     }
-    public ArrayList<Period> periods;
-    public ArrayList<String> weekdayText;
+
+    public List<Period> periods;
+    public List<String> weekdayText;
   }
   public OpeningHours openingHours;
   static public class Review {
@@ -37,7 +38,8 @@ public class Place {
       public int rating;
       public String type;
     }
-    public ArrayList<Aspect> aspects;
+
+    public List<Aspect> aspects;
     public String authorName;
     public String authorUrl;
     public String language;
@@ -45,8 +47,9 @@ public class Place {
     public String text;
     public long time;
   }
-  public ArrayList<Review> reviews;
-  public ArrayList<String> types;
+
+  public List<Review> reviews;
+  public List<String> types;
   public String url;
   public int userRatingsTotal;
   public String website;

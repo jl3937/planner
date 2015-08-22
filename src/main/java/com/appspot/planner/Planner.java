@@ -3,14 +3,9 @@ package com.appspot.planner;
 import com.appspot.planner.model.*;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
-import com.google.api.server.spi.response.NotFoundException;
-import com.google.appengine.api.users.User;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-
-import javax.inject.Named;
 
 /**
  * Defines v1 of a helloworld API, which provides simple "greeting" methods.

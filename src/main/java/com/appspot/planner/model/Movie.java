@@ -9,13 +9,13 @@ public class Movie {
     public String address;
     public ArrayList<String> times;
     public Theater() {
-      times = new ArrayList<String>();
+      times = new ArrayList<>();
     }
   }
   public ArrayList<Theater> theaters;
   public Theater theater;
   public Movie() {
     duration = new Duration();
-    theaters = new ArrayList<Theater>();
+    theaters = new ArrayList<>();
   }
 }

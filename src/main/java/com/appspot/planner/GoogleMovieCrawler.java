@@ -24,7 +24,7 @@ public class GoogleMovieCrawler {
     String result = urlFetcher.getResult();
     Document doc = Jsoup.parse(result);
     Elements movieEls = doc.getElementsByClass("movie");
-    ArrayList<Movie> movies = new ArrayList<Movie>();
+    ArrayList<Movie> movies = new ArrayList<>();
     for (Element movieEl : movieEls) {
       Movie movie = new Movie();
       movie.duration.text =

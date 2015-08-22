@@ -1,13 +1,14 @@
 package com.appspot.planner.model;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class DistanceMatrixResult {
   public String status;
-  public ArrayList<String> originAddresses;
-  public ArrayList<String> destinationAddresses;
+  public List<String> originAddresses;
+  public List<String> destinationAddresses;
   static public class Row {
-    public ArrayList<Transit> elements;
+    public List<Transit> elements;
   }
-  public ArrayList<Row> rows;
+
+  public List<Row> rows;
 }
