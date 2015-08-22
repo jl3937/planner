@@ -13,6 +13,7 @@ public class Movie {
     }
   }
   public ArrayList<Theater> theaters;
+  public Theater theater;
   public Movie() {
     theaters = new ArrayList<Theater>();
   }

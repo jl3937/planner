@@ -63,6 +63,8 @@ public class Planner {
             this.googleMovieCrawler.searchMovie(event.content, previousLoc);
         for (Movie movie : movieResults) {
           Movie.Theater theater = movie.theaters.get(0);
+          movie.theater = theater;
+          movie.theaters.clear();
           eventLoc = theater.address;
           eventContent = theater.name;
           selectedMovie = movie;

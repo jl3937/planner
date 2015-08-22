@@ -36,7 +36,13 @@ public class GoogleMovieCrawler {
         int amIndex = -1, pmIndex = -1;
         int index = 0;
         for (Element timeEl : timesEl.children()) {
-          String time = timeEl.ownText();
+          String time = "";
+          Element linkEl = timeEl.getElementsByTag("a").first();
+          if (linkEl != null) {
+            time = linkEl.ownText();
+          } else {
+            time = timeEl.ownText();
+          }
           if (time.endsWith("am")) {
             amIndex = index;
           } else if (time.endsWith("pm")) {
