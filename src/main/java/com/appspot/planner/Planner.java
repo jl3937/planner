@@ -95,16 +95,24 @@ public class Planner {
         ArrayList<Movie> movieResults =
             this.googleMovieCrawler.searchMovie(event.content, previousLoc);
         for (Movie movie : movieResults) {
-          Movie.Theater theater = movie.theaters.get(0);
-          movie.theater = theater;
-          movie.theaters.clear();
-          eventLoc = theater.address;
-          eventContent = theater.name;
-          selectedMovie = movie;
-          eventStartTime = theater.times.get(0).value;
-          duration = movie.duration.value;
-          break;
+          for (Movie.Theater theater : movie.theaters) {
+            if (theater.times.size() == 0 || theater.times.get(0).value < time) {
+              continue;
+            }
+            movie.theater = theater;
+            movie.theaters.clear();
+            eventLoc = theater.address;
+            eventContent = theater.name;
+            selectedMovie = movie;
+            eventStartTime = theater.times.get(0).value;
+            duration = movie.duration.value;
+            break;
+          }
         }
+      }
+
+      if (eventLoc.isEmpty()) {
+        continue;
       }
 
       DistanceMatrixResult result = this.googleGeoAPI.getDuration(
@@ -162,6 +170,10 @@ public class Planner {
     for (Transit transit : result.rows.get(0).elements) {
       selectedTransit = transit;
       break;
+    }
+
+    if (response.schedule.size() == 0) {
+      return response;
     }
 
     TimeSlot timeSlot = new TimeSlot();
