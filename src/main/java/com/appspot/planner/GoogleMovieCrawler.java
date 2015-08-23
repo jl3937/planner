@@ -100,6 +100,7 @@ public class GoogleMovieCrawler {
     Date date = calendar.getTime();
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
     TimeZone timeZone = TimeZone.getTimeZone("PST");
+    dateFormat.setTimeZone(timeZone);
     String currentTime = dateFormat.format(date);
 
     long milliseconds = 0;
@@ -114,6 +115,7 @@ public class GoogleMovieCrawler {
       try {
         String baseTime = String.format("%04d-%02d-%02dT00:00:00%s", year, month, day, zone);
         date = dateFormat.parse(baseTime);
+        System.out.println(date);
         return date.getTime();
       } catch(ParseException e) {
       }
@@ -135,6 +137,7 @@ public class GoogleMovieCrawler {
       if (hour < 12 && marker.equals("pm")) {
         hour += 12;
       }
+      System.out.println(hour + " " + minute);
       milliseconds += TimeUnit.MILLISECONDS.convert(hour, TimeUnit.HOURS);
       milliseconds += TimeUnit.MILLISECONDS.convert(minute, TimeUnit.MINUTES);
     }
