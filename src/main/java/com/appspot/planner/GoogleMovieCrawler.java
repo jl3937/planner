@@ -34,9 +34,25 @@ public class GoogleMovieCrawler {
     ArrayList<Movie> movies = new ArrayList<>();
     for (Element movieEl : movieEls) {
       Movie movie = new Movie();
-      movie.duration.text =
-        movieEl.getElementsByClass("info").get(1).html().split(" - ")[0];
+      movie.image = "http:" + movieEl.getElementsByClass("img").first().getElementsByTag("img").first().attr("src");
+      movie.name = movieEl.getElementsByClass("desc").first().getElementsByTag("h2").first().ownText();
+      Element infoEl = movieEl.getElementsByClass("info").get(1);
+      movie.info = infoEl.ownText();
+      int directorIndex = movie.info.indexOf("Director");
+      if (directorIndex > 0) {
+        movie.info = movie.info.substring(0, directorIndex - 1);
+      }
+      movie.duration.text = movie.info.split(" - ")[0];
       movie.duration.value = parseDuration(movie.duration.text);
+      Elements spanEls = infoEl.getElementsByTag("span");
+      for (Element spanEl : spanEls) {
+        if (spanEl.attr("itemprop").equals("director")) {
+          movie.director = spanEl.ownText();
+        } else if (spanEl.attr("itemprop").equals("actors")) {
+          movie.actors.add(spanEl.ownText());
+        }
+      }
+      movie.desc = movieEl.getElementsByClass("syn").first().getElementsByTag("span").first().ownText();
       Elements theaterEls = movieEl.getElementsByClass("theater");
       for (Element theaterEl : theaterEls) {
         Movie.Theater theater = new Movie.Theater();
