@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.Date;
 import java.util.TimeZone;
 
-
 /**
  * Defines v1 of a helloworld API, which provides simple "greeting" methods.
  */
@@ -164,7 +163,7 @@ public class Planner {
   }
 
   private String timeToString(long timestamp) {
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mmaa");
     TimeZone timeZone = TimeZone.getTimeZone("PST");
     dateFormat.setTimeZone(timeZone);
     Date date = new Date();

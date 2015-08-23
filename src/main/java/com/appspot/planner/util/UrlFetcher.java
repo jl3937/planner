@@ -28,7 +28,7 @@ public class UrlFetcher {
     String result = "";
     try {
       URL url = new URL(this.url + "?" + Joiner.on("&").join(this.parameters));
-      // System.out.println(url.toString());
+      System.out.println(url.toString());
       BufferedReader reader =
           new BufferedReader(new InputStreamReader(url.openStream()));
       String line = "";
@@ -40,7 +40,7 @@ public class UrlFetcher {
         result += line + "\n";
       }
       reader.close();
-      // System.out.println(result);
+      System.out.println(result);
     } catch (MalformedURLException e) {
     } catch (IOException e) {
     }

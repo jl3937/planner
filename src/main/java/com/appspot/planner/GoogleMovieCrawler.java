@@ -128,8 +128,11 @@ public class GoogleMovieCrawler {
     if (matcher.find() && matcher.groupCount() == 3) {
       int hour = Integer.parseInt(matcher.group(1));
       int minute = Integer.parseInt(matcher.group(2));
-      String noon = matcher.group(3);
-      if (hour < 12 && noon == "pm") {
+      String marker = matcher.group(3);
+      if (hour == 12 && marker.equals("am")) {
+        hour = 0;
+      }
+      if (hour < 12 && marker.equals("pm")) {
         hour += 12;
       }
       milliseconds += TimeUnit.MILLISECONDS.convert(hour, TimeUnit.HOURS);
