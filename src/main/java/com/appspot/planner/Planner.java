@@ -60,17 +60,36 @@ public class Planner {
       if (event.type == Event.Type.FOOD) {
         PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.content,
                                                                 previousLoc);
+        Date date = new Date(time);
+        calendar.setTime(date);
+        int day = calendar.get(Calendar.DAY_OF_WEEK);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
         for (PlaceResult.Result result : placeResult.results) {
-          if (result.openingHours == null ||
-              result.openingHours.openNow == true) {
-            String placeId = result.placeId;
-            selectedPlace = this.googleGeoAPI.getPlaceDetail(placeId).result;
-            eventLoc = result.formattedAddress;
-            eventContent = result.name;
-            duration = TimeUnit.MILLISECONDS.convert(
-                    Constants.FOOD_TIME_IN_SECOND, TimeUnit.SECONDS);
-            break;
+          if (result.openingHours != null && !result.openingHours.openNow) {
+            continue;
           }
+          selectedPlace = this.googleGeoAPI.getPlaceDetail(result.placeId).result;
+          boolean open = false;
+          for (Place.OpeningHours.Period period : selectedPlace.openingHours.periods) {
+            if (period.open.day == day - 1) {
+              int openTime = Integer.parseInt(period.open.time);
+              int closeTime = Integer.parseInt(period.close.time);
+              if (openTime / 100 < hour && hour < closeTime &&
+                  openTime % 100 < minute && minute < closeTime) {
+                open = true;
+              }
+              break;
+            }
+          }
+          if (!open) {
+            continue;
+          }
+          eventLoc = result.formattedAddress;
+          eventContent = result.name;
+          duration = TimeUnit.MILLISECONDS.convert(
+                  Constants.FOOD_TIME_IN_SECOND, TimeUnit.SECONDS);
+          break;
         }
       } else if (event.type == Event.Type.MOVIE) {
         ArrayList<Movie> movieResults =
