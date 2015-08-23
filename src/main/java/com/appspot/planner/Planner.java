@@ -57,6 +57,7 @@ public class Planner {
       Place selectedPlace = null;
       Movie selectedMovie = null;
       long duration = 0;
+      long eventStartTime = 0;
       if (event.type == Event.Type.FOOD) {
         PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.content,
                                                                 previousLoc);
@@ -82,6 +83,7 @@ public class Planner {
           eventLoc = theater.address;
           eventContent = theater.name;
           selectedMovie = movie;
+          eventStartTime = theater.times.get(0).value;
           duration = movie.duration.value;
           break;
         }
@@ -114,6 +116,9 @@ public class Planner {
       timeSlot = new TimeSlot();
       timeSlot.event.content = eventContent;
       timeSlot.event.type = event.type;
+      if (eventStartTime != 0) {
+        time = eventStartTime;
+      }
       timeSlot.spec.startTime.value = time;
       timeSlot.spec.startTime.text = timeToString(time);
       time += duration;
@@ -159,7 +164,7 @@ public class Planner {
   }
 
   private String timeToString(long timestamp) {
-    SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd HH:mm");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     TimeZone timeZone = TimeZone.getTimeZone("PST");
     dateFormat.setTimeZone(timeZone);
     Date date = new Date();

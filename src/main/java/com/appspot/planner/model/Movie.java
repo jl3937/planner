@@ -7,7 +7,7 @@ public class Movie {
   static public class Theater {
     public String name;
     public String address;
-    public ArrayList<String> times;
+    public ArrayList<Time> times;
     public Theater() {
       times = new ArrayList<>();
     }

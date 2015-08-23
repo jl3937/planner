@@ -1,12 +1,6 @@
 package com.appspot.planner.model;
 
 public class Spec {
-  // Time in milliseconds.
-  static public class Time {
-    public long value;
-    public String text;
-  }
-
   public Time startTime;
   public Time endTime;
 
