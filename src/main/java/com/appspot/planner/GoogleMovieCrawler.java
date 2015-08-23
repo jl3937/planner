@@ -3,26 +3,27 @@ package com.appspot.planner;
 import com.appspot.planner.model.Movie;
 import com.appspot.planner.model.Time;
 import com.appspot.planner.util.UrlFetcher;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.concurrent.TimeUnit;
 import java.util.Date;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.TimeZone;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 
 public class GoogleMovieCrawler {
   private static final String GOOGLE_MOVIE_URL = "http://www.google.com/movies";
 
-  public GoogleMovieCrawler() {}
+  public GoogleMovieCrawler() {
+  }
+
   public ArrayList<Movie> searchMovie(String name, String loc) {
     UrlFetcher urlFetcher = new UrlFetcher(GOOGLE_MOVIE_URL);
     urlFetcher.addParameter("q", name);
@@ -56,10 +57,8 @@ public class GoogleMovieCrawler {
       Elements theaterEls = movieEl.getElementsByClass("theater");
       for (Element theaterEl : theaterEls) {
         Movie.Theater theater = new Movie.Theater();
-        theater.name =
-          theaterEl.getElementsByClass("name").first().child(0).html();
-        theater.address =
-          theaterEl.getElementsByClass("address").first().ownText();
+        theater.name = theaterEl.getElementsByClass("name").first().child(0).html();
+        theater.address = theaterEl.getElementsByClass("address").first().ownText();
         Element timesEl = theaterEl.getElementsByClass("times").first();
         int amIndex = -1, pmIndex = -1;
         int index = 0;
@@ -120,8 +119,7 @@ public class GoogleMovieCrawler {
     String currentTime = dateFormat.format(date);
 
     long milliseconds = 0;
-    Pattern pattern =
-        Pattern.compile("(\\d+)-(\\d+)-(\\d+)T(\\d+):(\\d+):(\\d+)(\\w+)");
+    Pattern pattern = Pattern.compile("(\\d+)-(\\d+)-(\\d+)T(\\d+):(\\d+):" + "(\\d+)(\\w+)");
     Matcher matcher = pattern.matcher(currentTime);
     if (matcher.find() && matcher.groupCount() == 7) {
       int year = Integer.parseInt(matcher.group(1));
@@ -132,7 +130,7 @@ public class GoogleMovieCrawler {
         String baseTime = String.format("%04d-%02d-%02dT00:00:00%s", year, month, day, zone);
         date = dateFormat.parse(baseTime);
         return date.getTime();
-      } catch(ParseException e) {
+      } catch (ParseException e) {
       }
     }
     return 0;

@@ -7,9 +7,9 @@ import com.google.api.server.spi.config.ApiMethod;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.concurrent.TimeUnit;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Defines v1 of a helloworld API, which provides simple "greeting" methods.
@@ -18,9 +18,9 @@ import java.util.TimeZone;
     name = "planner",
     version = "v1",
     scopes = {Constants.EMAIL_SCOPE},
-    clientIds = {Constants.WEB_CLIENT_ID, Constants.ANDROID_CLIENT_ID, Constants.IOS_CLIENT_ID, Constants.API_EXPLORER_CLIENT_ID},
-    audiences = {Constants.ANDROID_AUDIENCE}
-)
+    clientIds = {Constants.WEB_CLIENT_ID, Constants.ANDROID_CLIENT_ID, Constants.IOS_CLIENT_ID, Constants
+        .API_EXPLORER_CLIENT_ID},
+    audiences = {Constants.ANDROID_AUDIENCE})
 public class Planner {
   GoogleGeoAPI googleGeoAPI;
   GoogleMovieCrawler googleMovieCrawler;
@@ -58,8 +58,7 @@ public class Planner {
       long duration = 0;
       long eventStartTime = 0;
       if (event.type == Event.Type.FOOD) {
-        PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.content,
-                                                                previousLoc);
+        PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.content, previousLoc);
         Date date = new Date(time);
         calendar.setTime(date);
         int day = calendar.get(Calendar.DAY_OF_WEEK);
@@ -87,13 +86,11 @@ public class Planner {
           }
           eventLoc = result.formattedAddress;
           eventContent = result.name;
-          duration = TimeUnit.MILLISECONDS.convert(
-                  Constants.FOOD_TIME_IN_SECOND, TimeUnit.SECONDS);
+          duration = TimeUnit.MILLISECONDS.convert(Constants.FOOD_TIME_IN_SECOND, TimeUnit.SECONDS);
           break;
         }
       } else if (event.type == Event.Type.MOVIE) {
-        ArrayList<Movie> movieResults =
-            this.googleMovieCrawler.searchMovie(event.content, previousLoc);
+        ArrayList<Movie> movieResults = this.googleMovieCrawler.searchMovie(event.content, previousLoc);
         for (Movie movie : movieResults) {
           for (Movie.Theater theater : movie.theaters) {
             if (theater.times.size() == 0 || theater.times.get(0).value < time) {
@@ -115,22 +112,19 @@ public class Planner {
         continue;
       }
 
-      DistanceMatrixResult result = this.googleGeoAPI.getDuration(
-          previousLoc,
-          eventLoc,
-          request.requirement.travelMode.name().toLowerCase());
+      DistanceMatrixResult result = this.googleGeoAPI.getDuration(previousLoc, eventLoc, request.requirement
+          .travelMode.name().toLowerCase());
       Transit selectedTransit = null;
       for (Transit transit : result.rows.get(0).elements) {
         selectedTransit = transit;
         break;
       }
-      
+
       TimeSlot timeSlot = new TimeSlot();
       timeSlot.event.type = Event.Type.TRANSPORT;
       timeSlot.spec.startTime.value = time;
       timeSlot.spec.startTime.text = timeToString(time);
-      time += TimeUnit.MILLISECONDS.convert(selectedTransit.duration.value,
-              TimeUnit.SECONDS);
+      time += TimeUnit.MILLISECONDS.convert(selectedTransit.duration.value, TimeUnit.SECONDS);
       timeSlot.spec.endTime.value = time;
       timeSlot.spec.endTime.text = timeToString(time);
       timeSlot.spec.startLoc = previousLoc;
@@ -162,10 +156,8 @@ public class Planner {
     if (request.requirement.endLoc == null) {
       request.requirement.endLoc = request.requirement.startLoc;
     }
-    DistanceMatrixResult result = this.googleGeoAPI.getDuration(
-        previousLoc,
-        request.requirement.endLoc,
-        request.requirement.travelMode.name().toLowerCase());
+    DistanceMatrixResult result = this.googleGeoAPI.getDuration(previousLoc, request.requirement.endLoc, request
+        .requirement.travelMode.name().toLowerCase());
     Transit selectedTransit = null;
     for (Transit transit : result.rows.get(0).elements) {
       selectedTransit = transit;
@@ -180,8 +172,7 @@ public class Planner {
     timeSlot.event.type = Event.Type.TRANSPORT;
     timeSlot.spec.startTime.value = time;
     timeSlot.spec.startTime.text = timeToString(time);
-    time += TimeUnit.MILLISECONDS.convert(selectedTransit.duration.value,
-            TimeUnit.SECONDS);
+    time += TimeUnit.MILLISECONDS.convert(selectedTransit.duration.value, TimeUnit.SECONDS);
     timeSlot.spec.endTime.value = time;
     timeSlot.spec.endTime.text = timeToString(time);
     timeSlot.spec.startLoc = previousLoc;

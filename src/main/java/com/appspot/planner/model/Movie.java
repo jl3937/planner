@@ -11,16 +11,20 @@ public class Movie {
   public Duration duration;
   public String director;
   public List<String> actors;
+
   static public class Theater {
     public String name;
     public String address;
     public List<Time> times;
+
     public Theater() {
       times = new ArrayList<>();
     }
   }
+
   public List<Theater> theaters;
   public Theater theater;
+
   public Movie() {
     actors = new ArrayList<>();
     duration = new Duration();

@@ -9,12 +9,14 @@ public class Spec {
 
   public int priceLevel;
   public int numberOfPeople;
+
   public enum TravelMode {
     DRIVING,
     WALKING,
     BICYCLING,
     TRANSIT
   }
+
   public TravelMode travelMode;
 
   public Spec() {

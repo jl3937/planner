@@ -6,6 +6,7 @@ public class DistanceMatrixResult {
   public String status;
   public List<String> originAddresses;
   public List<String> destinationAddresses;
+
   static public class Row {
     public List<Transit> elements;
   }

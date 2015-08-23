@@ -1,7 +1,5 @@
 package com.appspot.planner.model;
 
-import java.util.ArrayList;
-
 public class TimeSlot {
   public TimeSlot() {
     event = new Event();
