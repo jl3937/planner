@@ -9,14 +9,17 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class UrlFetcher {
-  String url;
-  ArrayList<String> parameters;
+  private String url;
+  private List<String> parameters;
+
   public UrlFetcher(String url) {
     this.url = url;
-    parameters = new ArrayList<String>();
+    parameters = new ArrayList<>();
   }
+
   public void addParameter(String key, String value) {
     String parameter = key + "=" + URLEncoder.encode(value);
     this.parameters.add(parameter);
