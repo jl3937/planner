@@ -70,19 +70,21 @@ public class Planner {
           }
           selectedPlace = this.googleGeoAPI.getPlaceDetail(result.placeId).result;
           boolean open = false;
-          for (Place.OpeningHours.Period period : selectedPlace.openingHours.periods) {
-            if (period.open.day == day - 1) {
-              int openTime = Integer.parseInt(period.open.time);
-              int closeTime = Integer.parseInt(period.close.time);
-              if (openTime / 100 < hour && hour < closeTime &&
-                  openTime % 100 < minute && minute < closeTime) {
-                open = true;
+          if (selectedPlace.openingHours != null) {
+            for (Place.OpeningHours.Period period : selectedPlace.openingHours.periods) {
+              if (period.open.day == day - 1) {
+                int openTime = Integer.parseInt(period.open.time);
+                int closeTime = Integer.parseInt(period.close.time);
+                if (openTime / 100 < hour && hour < closeTime &&
+                    openTime % 100 < minute && minute < closeTime) {
+                  open = true;
+                }
+                break;
               }
-              break;
             }
-          }
-          if (!open) {
-            continue;
+            if (!open) {
+              continue;
+            }
           }
           eventLoc = result.formattedAddress;
           eventContent = result.name;

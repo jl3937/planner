@@ -5,6 +5,7 @@ import com.google.common.base.Joiner;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -21,8 +22,13 @@ public class UrlFetcher {
   }
 
   public void addParameter(String key, String value) {
-    String parameter = key + "=" + URLEncoder.encode(value);
-    this.parameters.add(parameter);
+    String parameter = null;
+    try {
+      parameter = key + "=" + URLEncoder.encode(value, "UTF-8");
+      this.parameters.add(parameter);
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+    }
   }
 
   public String getResult() {
