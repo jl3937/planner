@@ -22,9 +22,8 @@ public class UrlFetcher {
   }
 
   public void addParameter(String key, String value) {
-    String parameter = null;
     try {
-      parameter = key + "=" + URLEncoder.encode(value, "UTF-8");
+      String parameter = key + "=" + URLEncoder.encode(value, "UTF-8");
       this.parameters.add(parameter);
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();

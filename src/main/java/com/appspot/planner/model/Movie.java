@@ -6,6 +6,7 @@ import java.util.List;
 public class Movie {
   public String image;
   public String name;
+  public String trailer;
   public String info;
   public String desc;
   public Duration duration;

@@ -8,6 +8,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,6 +39,22 @@ public class GoogleMovieCrawler {
       Movie movie = new Movie();
       movie.image = "http:" + movieEl.getElementsByClass("img").first().getElementsByTag("img").first().attr("src");
       movie.name = movieEl.getElementsByClass("desc").first().getElementsByTag("h2").first().ownText();
+      Elements linkEls = movieEl.getElementsByClass("info").get(0).getElementsByTag("a");
+      for (Element linkEl : linkEls) {
+        if (linkEl.ownText().equals("Trailer")) {
+          String url = linkEl.attr("href");
+          int begin = url.indexOf("q=") + 2;
+          int end = url.indexOf("&");
+          if (begin >= 2 && end > begin) {
+            try {
+              movie.trailer = URLDecoder.decode(url.substring(begin, end), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+              e.printStackTrace();
+            }
+          }
+          break;
+        }
+      }
       Element infoEl = movieEl.getElementsByClass("info").get(1);
       movie.info = infoEl.ownText();
       int directorIndex = movie.info.indexOf("Director");
@@ -118,7 +136,6 @@ public class GoogleMovieCrawler {
     dateFormat.setTimeZone(timeZone);
     String currentTime = dateFormat.format(date);
 
-    long milliseconds = 0;
     Pattern pattern = Pattern.compile("(\\d+)-(\\d+)-(\\d+)T(\\d+):(\\d+):" + "(\\d+)(\\w+)");
     Matcher matcher = pattern.matcher(currentTime);
     if (matcher.find() && matcher.groupCount() == 7) {
