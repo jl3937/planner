@@ -63,10 +63,8 @@ public class Planner {
         int day = calendar.get(Calendar.DAY_OF_WEEK);
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
+        int hourMinute = hour * 100 + minute;
         for (PlaceResult.Result result : placeResult.results) {
-          if (result.openingHours != null && !result.openingHours.openNow) {
-            continue;
-          }
           selectedPlace = this.googleGeoAPI.getPlaceDetail(result.placeId).result;
           boolean open = false;
           if (selectedPlace.openingHours != null) {
@@ -74,9 +72,14 @@ public class Planner {
               if (period.open.day == day - 1) {
                 int openTime = Integer.parseInt(period.open.time);
                 int closeTime = Integer.parseInt(period.close.time);
-                if (openTime / 100 < hour && hour < closeTime &&
-                    openTime % 100 < minute && minute < closeTime) {
+                if (openTime <= hourMinute && hourMinute < closeTime) {
                   open = true;
+                  break;
+                } else if (hourMinute < openTime) {
+                  open = true;
+                  eventStartTime = time +
+                      TimeUnit.MILLISECONDS.convert((openTime - hourMinute) / 100, TimeUnit.HOURS) +
+                      TimeUnit.MILLISECONDS.convert((openTime - hourMinute) % 100, TimeUnit.MINUTES);
                   break;
                 }
               }
