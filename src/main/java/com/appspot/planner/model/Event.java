@@ -6,6 +6,7 @@ public class Event {
   public String content;
 
   public enum Type {
+    PLACE,
     FOOD,
     MOVIE,
     TRANSPORT

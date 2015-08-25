@@ -2,7 +2,7 @@ package com.appspot.planner;
 
 /**
  * Contains the client IDs and scopes for allowed clients consuming the
- * helloworld API.
+ * planner API.
  */
 public class Constants {
   public static final String WEB_CLIENT_ID = "replace this with your web " + "client ID";
@@ -13,6 +13,4 @@ public class Constants {
   public static final String ANDROID_AUDIENCE = WEB_CLIENT_ID;
   public static final String EMAIL_SCOPE = "https://www.googleapis" + ".com/auth/userinfo.email";
   public static final String API_KEY = "AIzaSyAD6lYA1_7oUGMAPkRJ3duNIlPRuzohvNw";
-
-  public static final long FOOD_TIME_IN_SECOND = 3600;
 }

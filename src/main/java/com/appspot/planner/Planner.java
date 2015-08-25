@@ -23,6 +23,9 @@ public class Planner {
   GoogleMovieCrawler googleMovieCrawler;
   Calendar calendar;
 
+  public static final long DEFAULT_PLACE_TIME = 600000;
+  public static final long DEFAULT_FOOD_TIME = 3600000;
+
   public Planner() {
     this.googleGeoAPI = new GoogleGeoAPI();
     this.googleMovieCrawler = new GoogleMovieCrawler();
@@ -47,13 +50,13 @@ public class Planner {
       String eventLoc = "";
       String eventContent = "";
       if (event.type == null) {
-        event.type = Event.Type.FOOD;
+        event.type = Event.Type.PLACE;
       }
       Place selectedPlace = null;
       Movie selectedMovie = null;
       long duration = 0;
       long eventStartTime = 0;
-      if (event.type == Event.Type.FOOD) {
+      if (event.type == Event.Type.PLACE || event.type == Event.Type.FOOD) {
         PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.content, previousLoc);
         Date date = new Date(time);
         calendar.setTime(date);
@@ -84,7 +87,11 @@ public class Planner {
           }
           eventLoc = result.formattedAddress;
           eventContent = result.name;
-          duration = TimeUnit.MILLISECONDS.convert(Constants.FOOD_TIME_IN_SECOND, TimeUnit.SECONDS);
+          if (event.type == Event.Type.FOOD) {
+            duration = DEFAULT_FOOD_TIME;
+          } else {
+            duration = DEFAULT_PLACE_TIME;
+          }
           break;
         }
       } else if (event.type == Event.Type.MOVIE) {
