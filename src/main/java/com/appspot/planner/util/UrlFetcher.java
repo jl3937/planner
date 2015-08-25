@@ -36,7 +36,7 @@ public class UrlFetcher {
       URL url = new URL(this.url + "?" + Joiner.on("&").join(this.parameters));
       System.out.println(url.toString());
       BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-      String line = "";
+      String line;
       while (true) {
         line = reader.readLine();
         if (line == null) {

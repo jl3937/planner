@@ -11,9 +11,6 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Defines v1 of a helloworld API, which provides simple "greeting" methods.
- */
 @Api(
     name = "planner",
     version = "v1",
@@ -40,7 +37,7 @@ public class Planner {
       request.requirement.travelMode = Spec.TravelMode.DRIVING;
     }
 
-    long time = 0;
+    long time;
     if (request.requirement.startTime.value <= 0) {
       time = this.calendar.getTime().getTime();
     } else {
@@ -49,7 +46,6 @@ public class Planner {
     for (Event event : request.events) {
       String eventLoc = "";
       String eventContent = "";
-      String eventLength = "";
       if (event.type == null) {
         event.type = Event.Type.FOOD;
       }
@@ -78,8 +74,8 @@ public class Planner {
                 if (openTime / 100 < hour && hour < closeTime &&
                     openTime % 100 < minute && minute < closeTime) {
                   open = true;
+                  break;
                 }
-                break;
               }
             }
             if (!open) {
