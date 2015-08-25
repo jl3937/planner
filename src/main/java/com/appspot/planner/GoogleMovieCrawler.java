@@ -10,12 +10,8 @@ import org.jsoup.select.Elements;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,11 +22,11 @@ public class GoogleMovieCrawler {
   public GoogleMovieCrawler() {
   }
 
-  public ArrayList<Movie> searchMovie(String name, String loc) {
+  public ArrayList<Movie> searchMovie(String name, String loc, int date, Calendar calendar) {
     UrlFetcher urlFetcher = new UrlFetcher(GOOGLE_MOVIE_URL);
     urlFetcher.addParameter("q", name);
     urlFetcher.addParameter("near", loc);
-    long baseTimestamp = getBaseTimestamp();
+    urlFetcher.addParameter("date", String.valueOf(date));
     String result = urlFetcher.getResult();
     Document doc = Jsoup.parse(result);
     Elements movieEls = doc.getElementsByClass("movie");
@@ -105,7 +101,7 @@ public class GoogleMovieCrawler {
         }
         for (int i = 0; i < theater.times.size(); ++i) {
           Time time = theater.times.get(i);
-          time.value = parseTime(time.text, baseTimestamp);
+          time.value = parseTime(time.text, calendar);
         }
         movie.theaters.add(theater);
       }
@@ -128,33 +124,7 @@ public class GoogleMovieCrawler {
     return milliseconds;
   }
 
-  private long getBaseTimestamp() {
-    Calendar calendar = Calendar.getInstance();
-    Date date = calendar.getTime();
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
-    TimeZone timeZone = TimeZone.getTimeZone("PST");
-    dateFormat.setTimeZone(timeZone);
-    String currentTime = dateFormat.format(date);
-
-    Pattern pattern = Pattern.compile("(\\d+)-(\\d+)-(\\d+)T(\\d+):(\\d+):" + "(\\d+)(\\w+)");
-    Matcher matcher = pattern.matcher(currentTime);
-    if (matcher.find() && matcher.groupCount() == 7) {
-      int year = Integer.parseInt(matcher.group(1));
-      int month = Integer.parseInt(matcher.group(2));
-      int day = Integer.parseInt(matcher.group(3));
-      String zone = matcher.group(7);
-      try {
-        String baseTime = String.format("%04d-%02d-%02dT00:00:00%s", year, month, day, zone);
-        date = dateFormat.parse(baseTime);
-        return date.getTime();
-      } catch (ParseException e) {
-      }
-    }
-    return 0;
-  }
-
-  private long parseTime(String text, long baseTimestamp) {
-    long milliseconds = baseTimestamp;
+  private long parseTime(String text, Calendar calendar) {
     Pattern pattern = Pattern.compile("(\\d+):(\\d+)(\\w+)");
     Matcher matcher = pattern.matcher(text);
     if (matcher.find() && matcher.groupCount() == 3) {
@@ -167,9 +137,12 @@ public class GoogleMovieCrawler {
       if (hour < 12 && marker.equals("pm")) {
         hour += 12;
       }
-      milliseconds += TimeUnit.MILLISECONDS.convert(hour, TimeUnit.HOURS);
-      milliseconds += TimeUnit.MILLISECONDS.convert(minute, TimeUnit.MINUTES);
+      calendar.set(Calendar.HOUR_OF_DAY, hour);
+      calendar.set(Calendar.MINUTE, minute);
+      calendar.set(Calendar.SECOND, 0);
+      calendar.set(Calendar.MILLISECOND, 0);
+      return calendar.getTimeInMillis();
     }
-    return milliseconds;
+    return 0;
   }
 }

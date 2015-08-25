@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 public class Planner {
   GoogleGeoAPI googleGeoAPI;
   GoogleMovieCrawler googleMovieCrawler;
-  Calendar calendar;
 
   public static final long DEFAULT_PLACE_TIME = 600000;
   public static final long DEFAULT_FOOD_TIME = 3600000;
@@ -29,7 +28,6 @@ public class Planner {
   public Planner() {
     this.googleGeoAPI = new GoogleGeoAPI();
     this.googleMovieCrawler = new GoogleMovieCrawler();
-    this.calendar = Calendar.getInstance();
   }
 
   @ApiMethod(name = "planner.get_plan", httpMethod = "post")
@@ -40,9 +38,17 @@ public class Planner {
       request.requirement.travelMode = Spec.TravelMode.DRIVING;
     }
 
+    Calendar calendar;
+    if (request.timeZone != null) {
+      calendar = Calendar.getInstance(TimeZone.getTimeZone(request.timeZone));
+    } else {
+      calendar = Calendar.getInstance();
+    }
+    int dayOfToday = calendar.get(Calendar.DAY_OF_WEEK);
+    TimeZone timeZone = calendar.getTimeZone();
     long time;
     if (request.requirement.startTime.value <= 0) {
-      time = this.calendar.getTime().getTime();
+      time = calendar.getTimeInMillis();
     } else {
       time = request.requirement.startTime.value;
     }
@@ -56,11 +62,10 @@ public class Planner {
       Movie selectedMovie = null;
       long duration = 0;
       long eventStartTime = 0;
+      calendar.setTimeInMillis(time);
+      int day = calendar.get(Calendar.DAY_OF_WEEK);
       if (event.type == Event.Type.PLACE || event.type == Event.Type.FOOD) {
         PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.content, previousLoc);
-        Date date = new Date(time);
-        calendar.setTime(date);
-        int day = calendar.get(Calendar.DAY_OF_WEEK);
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
         int hourMinute = hour * 100 + minute;
@@ -77,8 +82,7 @@ public class Planner {
                   break;
                 } else if (hourMinute < openTime) {
                   open = true;
-                  eventStartTime = time +
-                      TimeUnit.MILLISECONDS.convert((openTime - hourMinute) / 100, TimeUnit.HOURS) +
+                  eventStartTime = time + TimeUnit.MILLISECONDS.convert((openTime - hourMinute) / 100, TimeUnit.HOURS) +
                       TimeUnit.MILLISECONDS.convert((openTime - hourMinute) % 100, TimeUnit.MINUTES);
                   break;
                 }
@@ -98,7 +102,8 @@ public class Planner {
           break;
         }
       } else if (event.type == Event.Type.MOVIE) {
-        ArrayList<Movie> movieResults = this.googleMovieCrawler.searchMovie(event.content, previousLoc);
+        ArrayList<Movie> movieResults = this.googleMovieCrawler.searchMovie(event.content, previousLoc, day -
+            dayOfToday, calendar);
         for (Movie movie : movieResults) {
           for (Movie.Theater theater : movie.theaters) {
             if (theater.times.size() == 0 || theater.times.get(0).value < time) {
@@ -131,10 +136,10 @@ public class Planner {
       TimeSlot timeSlot = new TimeSlot();
       timeSlot.event.type = Event.Type.TRANSPORT;
       timeSlot.spec.startTime.value = time;
-      timeSlot.spec.startTime.text = timeToString(time);
+      timeSlot.spec.startTime.text = timeToString(time, timeZone);
       time += TimeUnit.MILLISECONDS.convert(selectedTransit.duration.value, TimeUnit.SECONDS);
       timeSlot.spec.endTime.value = time;
-      timeSlot.spec.endTime.text = timeToString(time);
+      timeSlot.spec.endTime.text = timeToString(time, timeZone);
       timeSlot.spec.startLoc = previousLoc;
       timeSlot.spec.endLoc = eventLoc;
       timeSlot.spec.travelMode = request.requirement.travelMode;
@@ -148,10 +153,10 @@ public class Planner {
         time = eventStartTime;
       }
       timeSlot.spec.startTime.value = time;
-      timeSlot.spec.startTime.text = timeToString(time);
+      timeSlot.spec.startTime.text = timeToString(time, timeZone);
       time += duration;
       timeSlot.spec.endTime.value = time;
-      timeSlot.spec.endTime.text = timeToString(time);
+      timeSlot.spec.endTime.text = timeToString(time, timeZone);
       timeSlot.spec.startLoc = eventLoc;
       timeSlot.spec.endLoc = eventLoc;
       timeSlot.place = selectedPlace;
@@ -179,10 +184,10 @@ public class Planner {
     TimeSlot timeSlot = new TimeSlot();
     timeSlot.event.type = Event.Type.TRANSPORT;
     timeSlot.spec.startTime.value = time;
-    timeSlot.spec.startTime.text = timeToString(time);
+    timeSlot.spec.startTime.text = timeToString(time, timeZone);
     time += TimeUnit.MILLISECONDS.convert(selectedTransit.duration.value, TimeUnit.SECONDS);
     timeSlot.spec.endTime.value = time;
-    timeSlot.spec.endTime.text = timeToString(time);
+    timeSlot.spec.endTime.text = timeToString(time, timeZone);
     timeSlot.spec.startLoc = previousLoc;
     timeSlot.spec.endLoc = request.requirement.endLoc;
     timeSlot.spec.travelMode = request.requirement.travelMode;
@@ -192,9 +197,8 @@ public class Planner {
     return response;
   }
 
-  private String timeToString(long timestamp) {
+  private String timeToString(long timestamp, TimeZone timeZone) {
     SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mmaa");
-    TimeZone timeZone = TimeZone.getTimeZone("PST");
     dateFormat.setTimeZone(timeZone);
     Date date = new Date();
     date.setTime(timestamp);
