@@ -1,12 +1,11 @@
 package com.appspot.planner;
 
-import com.appspot.planner.model.DistanceMatrixResult;
-import com.appspot.planner.model.PlaceDetailResult;
-import com.appspot.planner.model.PlaceResult;
+import com.appspot.planner.proto.PlannerProtos.*;
 import com.appspot.planner.util.UrlFetcher;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.googlecode.protobuf.format.JsonFormat;
 
 public class GoogleGeoAPI {
   private static final String DISTANCE_MATRIX_API_URL = "https://maps" + ".googleapis.com/maps/api/distancematrix/json";
@@ -26,9 +25,14 @@ public class GoogleGeoAPI {
     urlFetcher.addParameter("mode", mode);
     urlFetcher.addParameter("key", Constants.API_KEY);
     String json = urlFetcher.getResult();
-    DistanceMatrixResult result = new DistanceMatrixResult();
-    result = this.gson.fromJson(json, result.getClass());
-    return result;
+    DistanceMatrixResult.Builder builder = DistanceMatrixResult.newBuilder();
+    try {
+      JsonFormat.merge(json, builder);
+      return builder.build();
+    } catch (JsonFormat.ParseException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
   public PlaceResult searchPlace(String keyword, String location) {
@@ -36,9 +40,14 @@ public class GoogleGeoAPI {
     urlFetcher.addParameter("query", keyword + " near " + location);
     urlFetcher.addParameter("key", Constants.API_KEY);
     String json = urlFetcher.getResult();
-    PlaceResult result = new PlaceResult();
-    result = this.gson.fromJson(json, result.getClass());
-    return result;
+    PlaceResult.Builder builder = PlaceResult.newBuilder();
+    try {
+      JsonFormat.merge(json, builder);
+      return builder.build();
+    } catch (JsonFormat.ParseException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
   public PlaceDetailResult getPlaceDetail(String placeid) {
@@ -46,8 +55,13 @@ public class GoogleGeoAPI {
     urlFetcher.addParameter("placeid", placeid);
     urlFetcher.addParameter("key", Constants.API_KEY);
     String json = urlFetcher.getResult();
-    PlaceDetailResult result = new PlaceDetailResult();
-    result = this.gson.fromJson(json, result.getClass());
-    return result;
+    PlaceDetailResult.Builder builder = PlaceDetailResult.newBuilder();
+    try {
+      JsonFormat.merge(json, builder);
+      return builder.build();
+    } catch (JsonFormat.ParseException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 }

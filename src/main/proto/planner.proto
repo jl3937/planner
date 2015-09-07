@@ -1,0 +1,167 @@
+// protoc -I=src/main/proto/ --java_out=src/main/java/ src/main/proto/planner.proto
+
+package planner;
+
+option java_package = "com.appspot.planner.proto";
+option java_outer_classname = "PlannerProtos";
+
+message Time {
+  optional int64 value = 1;
+  optional string text = 2;
+}
+
+message Spec {
+  optional Time start_time = 1;
+  optional Time end_time = 2;
+  optional string start_loc = 3;
+  optional string end_loc = 4;
+  optional int32 price_level = 5;
+  optional int32 num_people = 6;
+
+  enum TravelMode {
+    DRIVING = 0;
+    WALKING = 1;
+    BICYCLING = 2;
+    TRANSIT = 3;
+  }
+  optional TravelMode travel_mode = 7;
+}
+
+message Event {
+  optional string content = 1;
+  enum Type {
+    PLACE = 0;
+    TRANSPORT = 1;
+    FOOD = 2;
+    MOVIE = 3;
+  }
+  optional Type type = 2;
+  optional Spec requirement = 3;
+  repeated string avoid = 4;
+}
+
+message GetPlanRequest {
+  optional string time_zone = 1;
+  repeated Event event = 2;
+  optional Spec requirement = 3;
+}
+
+message Duration {
+  optional int64 value = 1;
+  optional string text = 2;
+}
+
+message Transit {
+  optional string status = 1;
+  optional Duration duration = 2;
+  message Distance {
+    optional int64 value = 1;
+    optional string text = 2;
+  }
+  optional Distance distance = 3;
+}
+
+message DistanceMatrixResult {
+  optional string status = 1;
+  repeated string origin_addresses = 2;
+  repeated string destination_addresses = 3;
+  message Row {
+    repeated Transit elements = 1;
+  }
+  repeated Row rows = 4;
+}
+
+message Place {
+  optional string formatted_address = 1;
+  optional string formatted_phone_number = 2;
+  message Geometry {
+    message Location {
+      optional double lat = 1;
+      optional double lng = 2;
+    }
+    optional Location location = 1;
+  }
+  optional Geometry geometry = 3;
+  optional string icon = 4;
+  optional string international_phone_number = 5;
+  optional string name = 6;
+  optional int32 price_level = 7;
+  optional double rating = 8;
+  message OpeningHours {
+    optional bool open_now = 1;
+    repeated string weekday_text = 2;
+    message Period {
+      message DayTime {
+        optional int32 day = 1;
+        optional string time = 2;
+      }
+      optional DayTime close = 1;
+      optional DayTime open = 2;
+    }
+    repeated Period periods = 3;
+  }
+  optional OpeningHours opening_hours = 9;
+  message Review {
+    message Aspect {
+      optional int32 rating = 1;
+      optional string type = 2;
+    }
+    repeated Aspect aspects = 1;
+    optional string author_name = 2;
+    optional string author_url = 3;
+    optional string language = 4;
+    optional int32 rating = 5;
+    optional string text = 6;
+    optional int64 time = 7;
+  }
+  repeated Review reviews = 10;
+  repeated string types = 11;
+  optional string url = 12;
+  optional int32 user_rating_total = 13;
+  optional string website = 14;
+  optional string place_id = 15;
+}
+
+message PlaceDetailResult {
+  repeated string html_attributions = 1;
+  optional Place result = 2;
+  optional string status = 3;
+}
+
+message PlaceResult {
+  repeated string html_attributions = 1;
+  repeated Place results = 2;
+}
+
+message Theater {
+  optional string name = 1;
+  optional string address = 2;
+  repeated Time times = 3;
+}
+
+message Movie {
+  optional string image = 1;
+  optional string name = 2;
+  optional string trailer = 3;
+  optional string info = 4;
+  optional string desc = 5;
+  optional Duration duration = 6;
+  optional string director = 7;
+  repeated string actors = 8;
+  repeated Theater theaters = 9;
+}
+
+message TimeSlot {
+  optional Event event = 1;
+  optional Spec spec = 2;
+
+  // Only one of below is set for each time slot.
+  // TODO: use oneof.
+  optional Movie movie = 3;
+  optional Place place = 4;
+  optional Transit transit = 5;
+}
+
+message Plan {
+  repeated TimeSlot schedule = 1;
+}

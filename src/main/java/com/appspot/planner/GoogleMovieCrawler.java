@@ -1,7 +1,6 @@
 package com.appspot.planner;
 
-import com.appspot.planner.model.Movie;
-import com.appspot.planner.model.Time;
+import com.appspot.planner.proto.PlannerProtos.*;
 import com.appspot.planner.util.UrlFetcher;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -32,9 +31,9 @@ public class GoogleMovieCrawler {
     Elements movieEls = doc.getElementsByClass("movie");
     ArrayList<Movie> movies = new ArrayList<>();
     for (Element movieEl : movieEls) {
-      Movie movie = new Movie();
-      movie.image = "http:" + movieEl.getElementsByClass("img").first().getElementsByTag("img").first().attr("src");
-      movie.name = movieEl.getElementsByClass("desc").first().getElementsByTag("h2").first().ownText();
+      Movie.Builder movie = Movie.newBuilder();
+      movie.setImage("http:" + movieEl.getElementsByClass("img").first().getElementsByTag("img").first().attr("src"));
+      movie.setName(movieEl.getElementsByClass("desc").first().getElementsByTag("h2").first().ownText());
       Elements linkEls = movieEl.getElementsByClass("info").get(0).getElementsByTag("a");
       for (Element linkEl : linkEls) {
         if (linkEl.ownText().equals("Trailer")) {
@@ -43,7 +42,7 @@ public class GoogleMovieCrawler {
           int end = url.indexOf("&");
           if (begin >= 2 && end > begin) {
             try {
-              movie.trailer = URLDecoder.decode(url.substring(begin, end), "UTF-8");
+              movie.setTrailer(URLDecoder.decode(url.substring(begin, end), "UTF-8"));
             } catch (UnsupportedEncodingException e) {
               e.printStackTrace();
             }
@@ -52,27 +51,27 @@ public class GoogleMovieCrawler {
         }
       }
       Element infoEl = movieEl.getElementsByClass("info").get(1);
-      movie.info = infoEl.ownText();
-      int directorIndex = movie.info.indexOf("Director");
+      String info = infoEl.ownText();
+      int directorIndex = info.indexOf("Director");
       if (directorIndex > 0) {
-        movie.info = movie.info.substring(0, directorIndex - 1);
+        movie.setInfo(info.substring(0, directorIndex - 1));
       }
-      movie.duration.text = movie.info.split(" - ")[0];
-      movie.duration.value = parseDuration(movie.duration.text);
+      String durationText = info.split(" - ")[0];
+      movie.setDuration(Duration.newBuilder().setText(durationText).setValue(parseDuration(durationText)));
       Elements spanEls = infoEl.getElementsByTag("span");
       for (Element spanEl : spanEls) {
         if (spanEl.attr("itemprop").equals("director")) {
-          movie.director = spanEl.ownText();
+          movie.setDirector(spanEl.ownText());
         } else if (spanEl.attr("itemprop").equals("actors")) {
-          movie.actors.add(spanEl.ownText());
+          movie.addActors(spanEl.ownText());
         }
       }
-      movie.desc = movieEl.getElementsByClass("syn").first().getElementsByTag("span").first().ownText();
+      movie.setDesc(movieEl.getElementsByClass("syn").first().getElementsByTag("span").first().ownText());
       Elements theaterEls = movieEl.getElementsByClass("theater");
       for (Element theaterEl : theaterEls) {
-        Movie.Theater theater = new Movie.Theater();
-        theater.name = theaterEl.getElementsByClass("name").first().child(0).html();
-        theater.address = theaterEl.getElementsByClass("address").first().ownText();
+        Theater.Builder theater = Theater.newBuilder();
+        theater.setName(theaterEl.getElementsByClass("name").first().child(0).html());
+        theater.setAddress(theaterEl.getElementsByClass("address").first().ownText());
         Element timesEl = theaterEl.getElementsByClass("times").first();
         int amIndex = -1, pmIndex = -1;
         int index = 0;
@@ -81,31 +80,28 @@ public class GoogleMovieCrawler {
           if (linkEl == null) {
             continue;
           }
-          Time time = new Time();
-          time.text = linkEl.ownText();
-          if (time.text.endsWith("am")) {
+          Time.Builder time = Time.newBuilder();
+          time.setText(linkEl.ownText());
+          if (linkEl.ownText().endsWith("am")) {
             amIndex = index;
-          } else if (time.text.endsWith("pm")) {
+          } else if (linkEl.ownText().endsWith("pm")) {
             pmIndex = index;
           }
-          theater.times.add(time);
+          theater.addTimes(time);
           ++index;
         }
         for (int i = 0; i < amIndex; ++i) {
-          Time time = theater.times.get(i);
-          time.text += "am";
+          theater.getTimesBuilder(i).setText(theater.getTimes(i).getText() + "am");
         }
         for (int i = amIndex + 1; i < pmIndex; ++i) {
-          Time time = theater.times.get(i);
-          time.text += "pm";
+          theater.getTimesBuilder(i).setText(theater.getTimes(i).getText() + "pm");
         }
-        for (int i = 0; i < theater.times.size(); ++i) {
-          Time time = theater.times.get(i);
-          time.value = parseTime(time.text, calendar);
+        for (int i = 0; i < theater.getTimesCount(); ++i) {
+          theater.getTimesBuilder(i).setValue(parseTime(theater.getTimes(i).getText(), calendar));
         }
-        movie.theaters.add(theater);
+        movie.addTheaters(theater.build());
       }
-      movies.add(movie);
+      movies.add(movie.build());
     }
 
     return movies;

@@ -1,9 +1,14 @@
 package com.appspot.planner;
 
-import com.appspot.planner.model.*;
-import com.google.api.server.spi.config.Api;
-import com.google.api.server.spi.config.ApiMethod;
+import com.appspot.planner.proto.PlannerProtos.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.googlecode.protobuf.format.JsonFormat;
 
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,13 +16,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-@Api(
-    name = "planner",
-    version = "v1",
-    scopes = {Constants.EMAIL_SCOPE},
-    clientIds = {Constants.WEB_CLIENT_ID, Constants.ANDROID_CLIENT_ID, Constants.IOS_CLIENT_ID, Constants
-        .API_EXPLORER_CLIENT_ID},
-    audiences = {Constants.ANDROID_AUDIENCE})
+@Path("plan")
 public class Planner {
   GoogleGeoAPI googleGeoAPI;
   GoogleMovieCrawler googleMovieCrawler;
@@ -30,53 +29,58 @@ public class Planner {
     this.googleMovieCrawler = new GoogleMovieCrawler();
   }
 
-  @ApiMethod(name = "planner.get_plan", httpMethod = "post")
-  public Plan getPlan(GetPlanRequest request) {
-    Plan response = new Plan();
-    String previousLoc = request.requirement.startLoc;
-    if (request.requirement.travelMode == null) {
-      request.requirement.travelMode = Spec.TravelMode.DRIVING;
+  @POST
+  public String getPlan(String jsonRequest) {
+    GetPlanRequest request;
+    try {
+      GetPlanRequest.Builder requestBuilder = GetPlanRequest.newBuilder();
+      JsonFormat.merge(jsonRequest, requestBuilder);
+      request = requestBuilder.build();
+    } catch (JsonFormat.ParseException e) {
+      e.printStackTrace();
+      return "";
     }
 
+    Plan.Builder response = Plan.newBuilder();
+    String previousLoc = request.getRequirement().getStartLoc();
     Calendar calendar;
-    if (request.timeZone != null) {
-      calendar = Calendar.getInstance(TimeZone.getTimeZone(request.timeZone));
+    if (request.hasTimeZone()) {
+      calendar = Calendar.getInstance(TimeZone.getTimeZone(request.getTimeZone()));
     } else {
+      // By default, use system time zone.
       calendar = Calendar.getInstance();
     }
     int dayOfToday = calendar.get(Calendar.DAY_OF_WEEK);
     TimeZone timeZone = calendar.getTimeZone();
     long time;
-    if (request.requirement.startTime.value <= 0) {
-      time = calendar.getTimeInMillis();
+    if (request.getRequirement().getStartTime().hasValue()) {
+      time = request.getRequirement().getStartTime().getValue();
     } else {
-      time = request.requirement.startTime.value;
+      // By default, use current time.
+      time = calendar.getTimeInMillis();
     }
-    for (Event event : request.events) {
+    for (Event event : request.getEventList()) {
       String eventLoc = "";
       String eventContent = "";
-      if (event.type == null) {
-        event.type = Event.Type.PLACE;
-      }
       Place selectedPlace = null;
       Movie selectedMovie = null;
       long duration = 0;
       long eventStartTime = 0;
       calendar.setTimeInMillis(time);
       int day = calendar.get(Calendar.DAY_OF_WEEK);
-      if (event.type == Event.Type.PLACE || event.type == Event.Type.FOOD) {
-        PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.content, previousLoc);
+      if (event.getType() == Event.Type.PLACE || event.getType() == Event.Type.FOOD) {
+        PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.getContent(), previousLoc);
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
         int hourMinute = hour * 100 + minute;
-        for (PlaceResult.Result result : placeResult.results) {
-          selectedPlace = this.googleGeoAPI.getPlaceDetail(result.placeId).result;
+        for (Place result : placeResult.getResultsList()) {
+          selectedPlace = this.googleGeoAPI.getPlaceDetail(result.getPlaceId()).getResult();
           boolean open = false;
-          if (selectedPlace.openingHours != null) {
-            for (Place.OpeningHours.Period period : selectedPlace.openingHours.periods) {
-              if (period.open.day == day - 1) {
-                int openTime = Integer.parseInt(period.open.time);
-                int closeTime = Integer.parseInt(period.close.time);
+          if (selectedPlace.hasOpeningHours()) {
+            for (Place.OpeningHours.Period period : selectedPlace.getOpeningHours().getPeriodsList()) {
+              if (period.getOpen().getDay() == day - 1) {
+                int openTime = Integer.parseInt(period.getOpen().getTime());
+                int closeTime = Integer.parseInt(period.getClose().getTime());
                 if (openTime <= hourMinute && hourMinute < closeTime) {
                   open = true;
                   break;
@@ -92,30 +96,28 @@ public class Planner {
               continue;
             }
           }
-          eventLoc = result.formattedAddress;
-          eventContent = result.name;
-          if (event.type == Event.Type.FOOD) {
+          eventLoc = result.getFormattedAddress();
+          eventContent = result.getName();
+          if (event.getType() == Event.Type.FOOD) {
             duration = DEFAULT_FOOD_TIME;
           } else {
             duration = DEFAULT_PLACE_TIME;
           }
           break;
         }
-      } else if (event.type == Event.Type.MOVIE) {
-        ArrayList<Movie> movieResults = this.googleMovieCrawler.searchMovie(event.content, previousLoc, day -
+      } else if (event.getType() == Event.Type.MOVIE) {
+        ArrayList<Movie> movieResults = this.googleMovieCrawler.searchMovie(event.getContent(), previousLoc, day -
             dayOfToday, calendar);
         for (Movie movie : movieResults) {
-          for (Movie.Theater theater : movie.theaters) {
-            if (theater.times.size() == 0 || theater.times.get(0).value < time) {
+          for (Theater theater : movie.getTheatersList()) {
+            if (theater.getTimesCount() == 0 || theater.getTimes(0).getValue() < time) {
               continue;
             }
-            movie.theater = theater;
-            movie.theaters.clear();
-            eventLoc = theater.address;
-            eventContent = theater.name;
+            eventLoc = theater.getAddress();
+            eventContent = theater.getName();
             selectedMovie = movie;
-            eventStartTime = theater.times.get(0).value;
-            duration = movie.duration.value;
+            eventStartTime = theater.getTimes(0).getValue();
+            duration = movie.getDuration().getValue();
             break;
           }
         }
@@ -125,76 +127,76 @@ public class Planner {
         continue;
       }
 
-      DistanceMatrixResult result = this.googleGeoAPI.getDuration(previousLoc, eventLoc, request.requirement
-          .travelMode.name().toLowerCase());
+      DistanceMatrixResult result = this.googleGeoAPI.getDuration(previousLoc, eventLoc, request.getRequirement()
+          .getTravelMode().name().toLowerCase());
       Transit selectedTransit = null;
-      for (Transit transit : result.rows.get(0).elements) {
+      for (Transit transit : result.getRows(0).getElementsList()) {
         selectedTransit = transit;
         break;
       }
 
-      TimeSlot timeSlot = new TimeSlot();
-      timeSlot.event.type = Event.Type.TRANSPORT;
-      timeSlot.spec.startTime.value = time;
-      timeSlot.spec.startTime.text = timeToString(time, timeZone);
-      time += TimeUnit.MILLISECONDS.convert(selectedTransit.duration.value, TimeUnit.SECONDS);
-      timeSlot.spec.endTime.value = time;
-      timeSlot.spec.endTime.text = timeToString(time, timeZone);
-      timeSlot.spec.startLoc = previousLoc;
-      timeSlot.spec.endLoc = eventLoc;
-      timeSlot.spec.travelMode = request.requirement.travelMode;
-      timeSlot.transit = selectedTransit;
-      response.schedule.add(timeSlot);
+      TimeSlot.Builder timeSlot = TimeSlot.newBuilder();
+      timeSlot.getEventBuilder().setType(Event.Type.TRANSPORT);
+      timeSlot.getSpecBuilder().setStartTime(Time.newBuilder().setValue(time).setText(timeToString(time, timeZone)));
+      time += TimeUnit.MILLISECONDS.convert(selectedTransit.getDuration().getValue(), TimeUnit.SECONDS);
+      timeSlot.getSpecBuilder().setEndTime(Time.newBuilder().setValue(time).setText(timeToString(time, timeZone)))
+          .setStartLoc(previousLoc).setEndLoc(eventLoc).setTravelMode(request.getRequirement().getTravelMode());
+      timeSlot.setTransit(selectedTransit);
+      response.addSchedule(timeSlot.build());
 
-      timeSlot = new TimeSlot();
-      timeSlot.event.content = eventContent;
-      timeSlot.event.type = event.type;
+      timeSlot = TimeSlot.newBuilder();
+      timeSlot.getEventBuilder().setContent(eventContent).setType(event.getType());
       if (eventStartTime != 0) {
         time = eventStartTime;
       }
-      timeSlot.spec.startTime.value = time;
-      timeSlot.spec.startTime.text = timeToString(time, timeZone);
-      time += duration;
-      timeSlot.spec.endTime.value = time;
-      timeSlot.spec.endTime.text = timeToString(time, timeZone);
-      timeSlot.spec.startLoc = eventLoc;
-      timeSlot.spec.endLoc = eventLoc;
-      timeSlot.place = selectedPlace;
-      timeSlot.movie = selectedMovie;
-      response.schedule.add(timeSlot);
 
+      timeSlot.getSpecBuilder().getStartTimeBuilder().setValue(time).setText(timeToString(time, timeZone));
+      time += duration;
+      timeSlot.getSpecBuilder().getEndTimeBuilder().setValue(time).setText(timeToString(time, timeZone));
+      timeSlot.getSpecBuilder().setStartLoc(eventLoc).setEndLoc(eventLoc);
+      if (selectedPlace != null) {
+        timeSlot.setPlace(selectedPlace);
+      }
+      if (selectedMovie != null) {
+        timeSlot.setMovie(selectedMovie);
+      }
+      response.addSchedule(timeSlot.build());
       previousLoc = eventLoc;
     }
 
-    if (request.requirement.endLoc == null) {
-      request.requirement.endLoc = request.requirement.startLoc;
+    String endLoc;
+    if (request.getRequirement().hasEndLoc()) {
+      endLoc = request.getRequirement().getEndLoc();
+    } else {
+      endLoc = request.getRequirement().getStartLoc();
     }
-    DistanceMatrixResult result = this.googleGeoAPI.getDuration(previousLoc, request.requirement.endLoc, request
-        .requirement.travelMode.name().toLowerCase());
+    DistanceMatrixResult result = this.googleGeoAPI.getDuration(previousLoc, endLoc, request.getRequirement()
+        .getTravelMode().name().toLowerCase());
     Transit selectedTransit = null;
-    for (Transit transit : result.rows.get(0).elements) {
+    for (Transit transit : result.getRows(0).getElementsList()) {
       selectedTransit = transit;
       break;
     }
 
-    if (response.schedule.size() == 0) {
-      return response;
+    if (response.getScheduleCount() == 0) {
+      return "";
     }
 
-    TimeSlot timeSlot = new TimeSlot();
-    timeSlot.event.type = Event.Type.TRANSPORT;
-    timeSlot.spec.startTime.value = time;
-    timeSlot.spec.startTime.text = timeToString(time, timeZone);
-    time += TimeUnit.MILLISECONDS.convert(selectedTransit.duration.value, TimeUnit.SECONDS);
-    timeSlot.spec.endTime.value = time;
-    timeSlot.spec.endTime.text = timeToString(time, timeZone);
-    timeSlot.spec.startLoc = previousLoc;
-    timeSlot.spec.endLoc = request.requirement.endLoc;
-    timeSlot.spec.travelMode = request.requirement.travelMode;
-    timeSlot.transit = selectedTransit;
-    response.schedule.add(timeSlot);
+    TimeSlot.Builder timeSlot = TimeSlot.newBuilder();
+    timeSlot.getEventBuilder().setType(Event.Type.TRANSPORT);
+    timeSlot.getSpecBuilder().getStartTimeBuilder().setValue(time).setText(timeToString(time, timeZone));
+    time += TimeUnit.MILLISECONDS.convert(selectedTransit.getDuration().getValue(), TimeUnit.SECONDS);
+    timeSlot.getSpecBuilder().getEndTimeBuilder().setValue(time).setText(timeToString(time, timeZone));
+    timeSlot.getSpecBuilder().setStartLoc(previousLoc).setEndLoc(endLoc).setTravelMode(request.getRequirement()
+        .getTravelMode());
+    timeSlot.setTransit(selectedTransit);
+    response.addSchedule(timeSlot);
 
-    return response;
+    String responseJson = JsonFormat.printToString(response.build());
+    JsonParser parser = new JsonParser();
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    JsonElement el = parser.parse(responseJson);
+    return gson.toJson(el);
   }
 
   private String timeToString(long timestamp, TimeZone timeZone) {
