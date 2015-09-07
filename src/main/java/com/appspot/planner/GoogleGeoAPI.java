@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import com.googlecode.protobuf.format.JsonFormat;
 
 public class GoogleGeoAPI {
+  private static final String API_KEY = "AIzaSyAD6lYA1_7oUGMAPkRJ3duNIlPRuzohvNw";
   private static final String DISTANCE_MATRIX_API_URL = "https://maps" + ".googleapis.com/maps/api/distancematrix/json";
   private static final String PLACE_API_URL = "https://maps.googleapis" + ".com/maps/api/place/textsearch/json";
   private static final String PLACE_DETAIL_API_URL = "https://maps.googleapis" + ".com/maps/api/place/details/json";
@@ -23,7 +24,7 @@ public class GoogleGeoAPI {
     urlFetcher.addParameter("origins", origin);
     urlFetcher.addParameter("destinations", destination);
     urlFetcher.addParameter("mode", mode);
-    urlFetcher.addParameter("key", Constants.API_KEY);
+    urlFetcher.addParameter("key", API_KEY);
     String json = urlFetcher.getResult();
     DistanceMatrixResult.Builder builder = DistanceMatrixResult.newBuilder();
     try {
@@ -38,7 +39,7 @@ public class GoogleGeoAPI {
   public PlaceResult searchPlace(String keyword, String location) {
     UrlFetcher urlFetcher = new UrlFetcher(PLACE_API_URL);
     urlFetcher.addParameter("query", keyword + " near " + location);
-    urlFetcher.addParameter("key", Constants.API_KEY);
+    urlFetcher.addParameter("key", API_KEY);
     String json = urlFetcher.getResult();
     PlaceResult.Builder builder = PlaceResult.newBuilder();
     try {
@@ -53,7 +54,7 @@ public class GoogleGeoAPI {
   public PlaceDetailResult getPlaceDetail(String placeid) {
     UrlFetcher urlFetcher = new UrlFetcher(PLACE_DETAIL_API_URL);
     urlFetcher.addParameter("placeid", placeid);
-    urlFetcher.addParameter("key", Constants.API_KEY);
+    urlFetcher.addParameter("key", API_KEY);
     String json = urlFetcher.getResult();
     PlaceDetailResult.Builder builder = PlaceDetailResult.newBuilder();
     try {
