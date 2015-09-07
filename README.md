@@ -33,4 +33,4 @@ Planner REST Service.
 [3]: https://aws.amazon.com/ec2
 [4]: http://tomcat.apache.org/
 [5]: https://maven.apache.org/
-[6]: https://localhost:8080/planner
+[6]: http://localhost:8080/planner
