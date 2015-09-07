@@ -3,6 +3,7 @@
 package planner;
 
 option java_package = "com.appspot.planner.proto";
+
 option java_outer_classname = "PlannerProtos";
 
 message Time {
@@ -122,15 +123,21 @@ message Place {
   optional string place_id = 15;
 }
 
+message DebugLog {
+  repeated string line = 1;
+}
+
 message PlaceDetailResult {
-  repeated string html_attributions = 1;
-  optional Place result = 2;
-  optional string status = 3;
+  optional DebugLog debug_log = 1;
+  repeated string html_attributions = 2;
+  optional Place result = 3;
+  optional string status = 4;
 }
 
 message PlaceResult {
-  repeated string html_attributions = 1;
-  repeated Place results = 2;
+  optional DebugLog debug_log = 1;
+  repeated string html_attributions = 2;
+  repeated Place results = 3;
 }
 
 message Theater {

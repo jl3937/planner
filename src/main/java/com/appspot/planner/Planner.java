@@ -38,7 +38,7 @@ public class Planner {
       request = requestBuilder.build();
     } catch (JsonFormat.ParseException e) {
       e.printStackTrace();
-      return "";
+      return "Invalid request.";
     }
 
     Plan.Builder response = Plan.newBuilder();
@@ -179,7 +179,7 @@ public class Planner {
     }
 
     if (response.getScheduleCount() == 0) {
-      return "";
+      return "No available schedule.";
     }
 
     TimeSlot.Builder timeSlot = TimeSlot.newBuilder();

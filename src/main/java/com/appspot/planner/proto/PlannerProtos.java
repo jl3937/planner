@@ -15737,52 +15737,564 @@ public final class PlannerProtos {
     // @@protoc_insertion_point(class_scope:planner.Place)
   }
 
+  public interface DebugLogOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:planner.DebugLog)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated string line = 1;</code>
+     */
+    com.google.protobuf.ProtocolStringList
+        getLineList();
+    /**
+     * <code>repeated string line = 1;</code>
+     */
+    int getLineCount();
+    /**
+     * <code>repeated string line = 1;</code>
+     */
+    java.lang.String getLine(int index);
+    /**
+     * <code>repeated string line = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getLineBytes(int index);
+  }
+  /**
+   * Protobuf type {@code planner.DebugLog}
+   */
+  public static final class DebugLog extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:planner.DebugLog)
+      DebugLogOrBuilder {
+    // Use DebugLog.newBuilder() to construct.
+    private DebugLog(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private DebugLog(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final DebugLog defaultInstance;
+    public static DebugLog getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public DebugLog getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private DebugLog(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                line_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              line_.add(bs);
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          line_ = line_.getUnmodifiableView();
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.appspot.planner.proto.PlannerProtos.internal_static_planner_DebugLog_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.appspot.planner.proto.PlannerProtos.internal_static_planner_DebugLog_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.appspot.planner.proto.PlannerProtos.DebugLog.class, com.appspot.planner.proto.PlannerProtos.DebugLog.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<DebugLog> PARSER =
+        new com.google.protobuf.AbstractParser<DebugLog>() {
+      public DebugLog parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new DebugLog(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DebugLog> getParserForType() {
+      return PARSER;
+    }
+
+    public static final int LINE_FIELD_NUMBER = 1;
+    private com.google.protobuf.LazyStringList line_;
+    /**
+     * <code>repeated string line = 1;</code>
+     */
+    public com.google.protobuf.ProtocolStringList
+        getLineList() {
+      return line_;
+    }
+    /**
+     * <code>repeated string line = 1;</code>
+     */
+    public int getLineCount() {
+      return line_.size();
+    }
+    /**
+     * <code>repeated string line = 1;</code>
+     */
+    public java.lang.String getLine(int index) {
+      return line_.get(index);
+    }
+    /**
+     * <code>repeated string line = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getLineBytes(int index) {
+      return line_.getByteString(index);
+    }
+
+    private void initFields() {
+      line_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      for (int i = 0; i < line_.size(); i++) {
+        output.writeBytes(1, line_.getByteString(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      {
+        int dataSize = 0;
+        for (int i = 0; i < line_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(line_.getByteString(i));
+        }
+        size += dataSize;
+        size += 1 * getLineList().size();
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.appspot.planner.proto.PlannerProtos.DebugLog parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.appspot.planner.proto.PlannerProtos.DebugLog parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.appspot.planner.proto.PlannerProtos.DebugLog parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.appspot.planner.proto.PlannerProtos.DebugLog parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.appspot.planner.proto.PlannerProtos.DebugLog parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.appspot.planner.proto.PlannerProtos.DebugLog parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.appspot.planner.proto.PlannerProtos.DebugLog parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.appspot.planner.proto.PlannerProtos.DebugLog parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.appspot.planner.proto.PlannerProtos.DebugLog parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.appspot.planner.proto.PlannerProtos.DebugLog parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.appspot.planner.proto.PlannerProtos.DebugLog prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code planner.DebugLog}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:planner.DebugLog)
+        com.appspot.planner.proto.PlannerProtos.DebugLogOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.appspot.planner.proto.PlannerProtos.internal_static_planner_DebugLog_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.appspot.planner.proto.PlannerProtos.internal_static_planner_DebugLog_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.appspot.planner.proto.PlannerProtos.DebugLog.class, com.appspot.planner.proto.PlannerProtos.DebugLog.Builder.class);
+      }
+
+      // Construct using com.appspot.planner.proto.PlannerProtos.DebugLog.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        line_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.appspot.planner.proto.PlannerProtos.internal_static_planner_DebugLog_descriptor;
+      }
+
+      public com.appspot.planner.proto.PlannerProtos.DebugLog getDefaultInstanceForType() {
+        return com.appspot.planner.proto.PlannerProtos.DebugLog.getDefaultInstance();
+      }
+
+      public com.appspot.planner.proto.PlannerProtos.DebugLog build() {
+        com.appspot.planner.proto.PlannerProtos.DebugLog result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.appspot.planner.proto.PlannerProtos.DebugLog buildPartial() {
+        com.appspot.planner.proto.PlannerProtos.DebugLog result = new com.appspot.planner.proto.PlannerProtos.DebugLog(this);
+        int from_bitField0_ = bitField0_;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          line_ = line_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.line_ = line_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.appspot.planner.proto.PlannerProtos.DebugLog) {
+          return mergeFrom((com.appspot.planner.proto.PlannerProtos.DebugLog)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.appspot.planner.proto.PlannerProtos.DebugLog other) {
+        if (other == com.appspot.planner.proto.PlannerProtos.DebugLog.getDefaultInstance()) return this;
+        if (!other.line_.isEmpty()) {
+          if (line_.isEmpty()) {
+            line_ = other.line_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureLineIsMutable();
+            line_.addAll(other.line_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.appspot.planner.proto.PlannerProtos.DebugLog parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.appspot.planner.proto.PlannerProtos.DebugLog) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.LazyStringList line_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureLineIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          line_ = new com.google.protobuf.LazyStringArrayList(line_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <code>repeated string line = 1;</code>
+       */
+      public com.google.protobuf.ProtocolStringList
+          getLineList() {
+        return line_.getUnmodifiableView();
+      }
+      /**
+       * <code>repeated string line = 1;</code>
+       */
+      public int getLineCount() {
+        return line_.size();
+      }
+      /**
+       * <code>repeated string line = 1;</code>
+       */
+      public java.lang.String getLine(int index) {
+        return line_.get(index);
+      }
+      /**
+       * <code>repeated string line = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getLineBytes(int index) {
+        return line_.getByteString(index);
+      }
+      /**
+       * <code>repeated string line = 1;</code>
+       */
+      public Builder setLine(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureLineIsMutable();
+        line_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string line = 1;</code>
+       */
+      public Builder addLine(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureLineIsMutable();
+        line_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string line = 1;</code>
+       */
+      public Builder addAllLine(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureLineIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, line_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string line = 1;</code>
+       */
+      public Builder clearLine() {
+        line_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string line = 1;</code>
+       */
+      public Builder addLineBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureLineIsMutable();
+        line_.add(value);
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:planner.DebugLog)
+    }
+
+    static {
+      defaultInstance = new DebugLog(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:planner.DebugLog)
+  }
+
   public interface PlaceDetailResultOrBuilder extends
       // @@protoc_insertion_point(interface_extends:planner.PlaceDetailResult)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>optional .planner.DebugLog debug_log = 1;</code>
+     */
+    boolean hasDebugLog();
+    /**
+     * <code>optional .planner.DebugLog debug_log = 1;</code>
+     */
+    com.appspot.planner.proto.PlannerProtos.DebugLog getDebugLog();
+    /**
+     * <code>optional .planner.DebugLog debug_log = 1;</code>
+     */
+    com.appspot.planner.proto.PlannerProtos.DebugLogOrBuilder getDebugLogOrBuilder();
+
+    /**
+     * <code>repeated string html_attributions = 2;</code>
      */
     com.google.protobuf.ProtocolStringList
         getHtmlAttributionsList();
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>repeated string html_attributions = 2;</code>
      */
     int getHtmlAttributionsCount();
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>repeated string html_attributions = 2;</code>
      */
     java.lang.String getHtmlAttributions(int index);
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>repeated string html_attributions = 2;</code>
      */
     com.google.protobuf.ByteString
         getHtmlAttributionsBytes(int index);
 
     /**
-     * <code>optional .planner.Place result = 2;</code>
+     * <code>optional .planner.Place result = 3;</code>
      */
     boolean hasResult();
     /**
-     * <code>optional .planner.Place result = 2;</code>
+     * <code>optional .planner.Place result = 3;</code>
      */
     com.appspot.planner.proto.PlannerProtos.Place getResult();
     /**
-     * <code>optional .planner.Place result = 2;</code>
+     * <code>optional .planner.Place result = 3;</code>
      */
     com.appspot.planner.proto.PlannerProtos.PlaceOrBuilder getResultOrBuilder();
 
     /**
-     * <code>optional string status = 3;</code>
+     * <code>optional string status = 4;</code>
      */
     boolean hasStatus();
     /**
-     * <code>optional string status = 3;</code>
+     * <code>optional string status = 4;</code>
      */
     java.lang.String getStatus();
     /**
-     * <code>optional string status = 3;</code>
+     * <code>optional string status = 4;</code>
      */
     com.google.protobuf.ByteString
         getStatusBytes();
@@ -15840,17 +16352,30 @@ public final class PlannerProtos {
               break;
             }
             case 10: {
+              com.appspot.planner.proto.PlannerProtos.DebugLog.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = debugLog_.toBuilder();
+              }
+              debugLog_ = input.readMessage(com.appspot.planner.proto.PlannerProtos.DebugLog.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(debugLog_);
+                debugLog_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+            case 18: {
               com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
                 htmlAttributions_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
+                mutable_bitField0_ |= 0x00000002;
               }
               htmlAttributions_.add(bs);
               break;
             }
-            case 18: {
+            case 26: {
               com.appspot.planner.proto.PlannerProtos.Place.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+              if (((bitField0_ & 0x00000002) == 0x00000002)) {
                 subBuilder = result_.toBuilder();
               }
               result_ = input.readMessage(com.appspot.planner.proto.PlannerProtos.Place.PARSER, extensionRegistry);
@@ -15858,12 +16383,12 @@ public final class PlannerProtos {
                 subBuilder.mergeFrom(result_);
                 result_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000001;
+              bitField0_ |= 0x00000002;
               break;
             }
-            case 26: {
+            case 34: {
               com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000002;
+              bitField0_ |= 0x00000004;
               status_ = bs;
               break;
             }
@@ -15875,7 +16400,7 @@ public final class PlannerProtos {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
           htmlAttributions_ = htmlAttributions_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -15910,66 +16435,87 @@ public final class PlannerProtos {
     }
 
     private int bitField0_;
-    public static final int HTML_ATTRIBUTIONS_FIELD_NUMBER = 1;
+    public static final int DEBUG_LOG_FIELD_NUMBER = 1;
+    private com.appspot.planner.proto.PlannerProtos.DebugLog debugLog_;
+    /**
+     * <code>optional .planner.DebugLog debug_log = 1;</code>
+     */
+    public boolean hasDebugLog() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional .planner.DebugLog debug_log = 1;</code>
+     */
+    public com.appspot.planner.proto.PlannerProtos.DebugLog getDebugLog() {
+      return debugLog_;
+    }
+    /**
+     * <code>optional .planner.DebugLog debug_log = 1;</code>
+     */
+    public com.appspot.planner.proto.PlannerProtos.DebugLogOrBuilder getDebugLogOrBuilder() {
+      return debugLog_;
+    }
+
+    public static final int HTML_ATTRIBUTIONS_FIELD_NUMBER = 2;
     private com.google.protobuf.LazyStringList htmlAttributions_;
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>repeated string html_attributions = 2;</code>
      */
     public com.google.protobuf.ProtocolStringList
         getHtmlAttributionsList() {
       return htmlAttributions_;
     }
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>repeated string html_attributions = 2;</code>
      */
     public int getHtmlAttributionsCount() {
       return htmlAttributions_.size();
     }
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>repeated string html_attributions = 2;</code>
      */
     public java.lang.String getHtmlAttributions(int index) {
       return htmlAttributions_.get(index);
     }
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>repeated string html_attributions = 2;</code>
      */
     public com.google.protobuf.ByteString
         getHtmlAttributionsBytes(int index) {
       return htmlAttributions_.getByteString(index);
     }
 
-    public static final int RESULT_FIELD_NUMBER = 2;
+    public static final int RESULT_FIELD_NUMBER = 3;
     private com.appspot.planner.proto.PlannerProtos.Place result_;
     /**
-     * <code>optional .planner.Place result = 2;</code>
+     * <code>optional .planner.Place result = 3;</code>
      */
     public boolean hasResult() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
+      return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional .planner.Place result = 2;</code>
+     * <code>optional .planner.Place result = 3;</code>
      */
     public com.appspot.planner.proto.PlannerProtos.Place getResult() {
       return result_;
     }
     /**
-     * <code>optional .planner.Place result = 2;</code>
+     * <code>optional .planner.Place result = 3;</code>
      */
     public com.appspot.planner.proto.PlannerProtos.PlaceOrBuilder getResultOrBuilder() {
       return result_;
     }
 
-    public static final int STATUS_FIELD_NUMBER = 3;
+    public static final int STATUS_FIELD_NUMBER = 4;
     private java.lang.Object status_;
     /**
-     * <code>optional string status = 3;</code>
+     * <code>optional string status = 4;</code>
      */
     public boolean hasStatus() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
+      return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>optional string status = 3;</code>
+     * <code>optional string status = 4;</code>
      */
     public java.lang.String getStatus() {
       java.lang.Object ref = status_;
@@ -15986,7 +16532,7 @@ public final class PlannerProtos {
       }
     }
     /**
-     * <code>optional string status = 3;</code>
+     * <code>optional string status = 4;</code>
      */
     public com.google.protobuf.ByteString
         getStatusBytes() {
@@ -16003,6 +16549,7 @@ public final class PlannerProtos {
     }
 
     private void initFields() {
+      debugLog_ = com.appspot.planner.proto.PlannerProtos.DebugLog.getDefaultInstance();
       htmlAttributions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       result_ = com.appspot.planner.proto.PlannerProtos.Place.getDefaultInstance();
       status_ = "";
@@ -16020,14 +16567,17 @@ public final class PlannerProtos {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (int i = 0; i < htmlAttributions_.size(); i++) {
-        output.writeBytes(1, htmlAttributions_.getByteString(i));
-      }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeMessage(2, result_);
+        output.writeMessage(1, debugLog_);
+      }
+      for (int i = 0; i < htmlAttributions_.size(); i++) {
+        output.writeBytes(2, htmlAttributions_.getByteString(i));
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(3, getStatusBytes());
+        output.writeMessage(3, result_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(4, getStatusBytes());
       }
       getUnknownFields().writeTo(output);
     }
@@ -16038,6 +16588,10 @@ public final class PlannerProtos {
       if (size != -1) return size;
 
       size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, debugLog_);
+      }
       {
         int dataSize = 0;
         for (int i = 0; i < htmlAttributions_.size(); i++) {
@@ -16047,13 +16601,13 @@ public final class PlannerProtos {
         size += dataSize;
         size += 1 * getHtmlAttributionsList().size();
       }
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, result_);
-      }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, getStatusBytes());
+          .computeMessageSize(3, result_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(4, getStatusBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -16164,6 +16718,7 @@ public final class PlannerProtos {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getDebugLogFieldBuilder();
           getResultFieldBuilder();
         }
       }
@@ -16173,16 +16728,22 @@ public final class PlannerProtos {
 
       public Builder clear() {
         super.clear();
-        htmlAttributions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        if (debugLogBuilder_ == null) {
+          debugLog_ = com.appspot.planner.proto.PlannerProtos.DebugLog.getDefaultInstance();
+        } else {
+          debugLogBuilder_.clear();
+        }
         bitField0_ = (bitField0_ & ~0x00000001);
+        htmlAttributions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
         if (resultBuilder_ == null) {
           result_ = com.appspot.planner.proto.PlannerProtos.Place.getDefaultInstance();
         } else {
           resultBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000002);
-        status_ = "";
         bitField0_ = (bitField0_ & ~0x00000004);
+        status_ = "";
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -16211,21 +16772,29 @@ public final class PlannerProtos {
         com.appspot.planner.proto.PlannerProtos.PlaceDetailResult result = new com.appspot.planner.proto.PlannerProtos.PlaceDetailResult(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        if (debugLogBuilder_ == null) {
+          result.debugLog_ = debugLog_;
+        } else {
+          result.debugLog_ = debugLogBuilder_.build();
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
           htmlAttributions_ = htmlAttributions_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000002);
         }
         result.htmlAttributions_ = htmlAttributions_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000001;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000002;
         }
         if (resultBuilder_ == null) {
           result.result_ = result_;
         } else {
           result.result_ = resultBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000002;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000004;
         }
         result.status_ = status_;
         result.bitField0_ = to_bitField0_;
@@ -16244,10 +16813,13 @@ public final class PlannerProtos {
 
       public Builder mergeFrom(com.appspot.planner.proto.PlannerProtos.PlaceDetailResult other) {
         if (other == com.appspot.planner.proto.PlannerProtos.PlaceDetailResult.getDefaultInstance()) return this;
+        if (other.hasDebugLog()) {
+          mergeDebugLog(other.getDebugLog());
+        }
         if (!other.htmlAttributions_.isEmpty()) {
           if (htmlAttributions_.isEmpty()) {
             htmlAttributions_ = other.htmlAttributions_;
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000002);
           } else {
             ensureHtmlAttributionsIsMutable();
             htmlAttributions_.addAll(other.htmlAttributions_);
@@ -16258,7 +16830,7 @@ public final class PlannerProtos {
           mergeResult(other.getResult());
         }
         if (other.hasStatus()) {
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000008;
           status_ = other.status_;
           onChanged();
         }
@@ -16289,41 +16861,157 @@ public final class PlannerProtos {
       }
       private int bitField0_;
 
+      private com.appspot.planner.proto.PlannerProtos.DebugLog debugLog_ = com.appspot.planner.proto.PlannerProtos.DebugLog.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.appspot.planner.proto.PlannerProtos.DebugLog, com.appspot.planner.proto.PlannerProtos.DebugLog.Builder, com.appspot.planner.proto.PlannerProtos.DebugLogOrBuilder> debugLogBuilder_;
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public boolean hasDebugLog() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public com.appspot.planner.proto.PlannerProtos.DebugLog getDebugLog() {
+        if (debugLogBuilder_ == null) {
+          return debugLog_;
+        } else {
+          return debugLogBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public Builder setDebugLog(com.appspot.planner.proto.PlannerProtos.DebugLog value) {
+        if (debugLogBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          debugLog_ = value;
+          onChanged();
+        } else {
+          debugLogBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public Builder setDebugLog(
+          com.appspot.planner.proto.PlannerProtos.DebugLog.Builder builderForValue) {
+        if (debugLogBuilder_ == null) {
+          debugLog_ = builderForValue.build();
+          onChanged();
+        } else {
+          debugLogBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public Builder mergeDebugLog(com.appspot.planner.proto.PlannerProtos.DebugLog value) {
+        if (debugLogBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001) &&
+              debugLog_ != com.appspot.planner.proto.PlannerProtos.DebugLog.getDefaultInstance()) {
+            debugLog_ =
+              com.appspot.planner.proto.PlannerProtos.DebugLog.newBuilder(debugLog_).mergeFrom(value).buildPartial();
+          } else {
+            debugLog_ = value;
+          }
+          onChanged();
+        } else {
+          debugLogBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public Builder clearDebugLog() {
+        if (debugLogBuilder_ == null) {
+          debugLog_ = com.appspot.planner.proto.PlannerProtos.DebugLog.getDefaultInstance();
+          onChanged();
+        } else {
+          debugLogBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public com.appspot.planner.proto.PlannerProtos.DebugLog.Builder getDebugLogBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getDebugLogFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public com.appspot.planner.proto.PlannerProtos.DebugLogOrBuilder getDebugLogOrBuilder() {
+        if (debugLogBuilder_ != null) {
+          return debugLogBuilder_.getMessageOrBuilder();
+        } else {
+          return debugLog_;
+        }
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.appspot.planner.proto.PlannerProtos.DebugLog, com.appspot.planner.proto.PlannerProtos.DebugLog.Builder, com.appspot.planner.proto.PlannerProtos.DebugLogOrBuilder> 
+          getDebugLogFieldBuilder() {
+        if (debugLogBuilder_ == null) {
+          debugLogBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.appspot.planner.proto.PlannerProtos.DebugLog, com.appspot.planner.proto.PlannerProtos.DebugLog.Builder, com.appspot.planner.proto.PlannerProtos.DebugLogOrBuilder>(
+                  getDebugLog(),
+                  getParentForChildren(),
+                  isClean());
+          debugLog_ = null;
+        }
+        return debugLogBuilder_;
+      }
+
       private com.google.protobuf.LazyStringList htmlAttributions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureHtmlAttributionsIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
           htmlAttributions_ = new com.google.protobuf.LazyStringArrayList(htmlAttributions_);
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00000002;
          }
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public com.google.protobuf.ProtocolStringList
           getHtmlAttributionsList() {
         return htmlAttributions_.getUnmodifiableView();
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public int getHtmlAttributionsCount() {
         return htmlAttributions_.size();
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public java.lang.String getHtmlAttributions(int index) {
         return htmlAttributions_.get(index);
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public com.google.protobuf.ByteString
           getHtmlAttributionsBytes(int index) {
         return htmlAttributions_.getByteString(index);
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public Builder setHtmlAttributions(
           int index, java.lang.String value) {
@@ -16336,7 +17024,7 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public Builder addHtmlAttributions(
           java.lang.String value) {
@@ -16349,7 +17037,7 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public Builder addAllHtmlAttributions(
           java.lang.Iterable<java.lang.String> values) {
@@ -16360,16 +17048,16 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public Builder clearHtmlAttributions() {
         htmlAttributions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public Builder addHtmlAttributionsBytes(
           com.google.protobuf.ByteString value) {
@@ -16386,13 +17074,13 @@ public final class PlannerProtos {
       private com.google.protobuf.SingleFieldBuilder<
           com.appspot.planner.proto.PlannerProtos.Place, com.appspot.planner.proto.PlannerProtos.Place.Builder, com.appspot.planner.proto.PlannerProtos.PlaceOrBuilder> resultBuilder_;
       /**
-       * <code>optional .planner.Place result = 2;</code>
+       * <code>optional .planner.Place result = 3;</code>
        */
       public boolean hasResult() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
+        return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional .planner.Place result = 2;</code>
+       * <code>optional .planner.Place result = 3;</code>
        */
       public com.appspot.planner.proto.PlannerProtos.Place getResult() {
         if (resultBuilder_ == null) {
@@ -16402,7 +17090,7 @@ public final class PlannerProtos {
         }
       }
       /**
-       * <code>optional .planner.Place result = 2;</code>
+       * <code>optional .planner.Place result = 3;</code>
        */
       public Builder setResult(com.appspot.planner.proto.PlannerProtos.Place value) {
         if (resultBuilder_ == null) {
@@ -16414,11 +17102,11 @@ public final class PlannerProtos {
         } else {
           resultBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000004;
         return this;
       }
       /**
-       * <code>optional .planner.Place result = 2;</code>
+       * <code>optional .planner.Place result = 3;</code>
        */
       public Builder setResult(
           com.appspot.planner.proto.PlannerProtos.Place.Builder builderForValue) {
@@ -16428,15 +17116,15 @@ public final class PlannerProtos {
         } else {
           resultBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000004;
         return this;
       }
       /**
-       * <code>optional .planner.Place result = 2;</code>
+       * <code>optional .planner.Place result = 3;</code>
        */
       public Builder mergeResult(com.appspot.planner.proto.PlannerProtos.Place value) {
         if (resultBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002) &&
+          if (((bitField0_ & 0x00000004) == 0x00000004) &&
               result_ != com.appspot.planner.proto.PlannerProtos.Place.getDefaultInstance()) {
             result_ =
               com.appspot.planner.proto.PlannerProtos.Place.newBuilder(result_).mergeFrom(value).buildPartial();
@@ -16447,11 +17135,11 @@ public final class PlannerProtos {
         } else {
           resultBuilder_.mergeFrom(value);
         }
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000004;
         return this;
       }
       /**
-       * <code>optional .planner.Place result = 2;</code>
+       * <code>optional .planner.Place result = 3;</code>
        */
       public Builder clearResult() {
         if (resultBuilder_ == null) {
@@ -16460,19 +17148,19 @@ public final class PlannerProtos {
         } else {
           resultBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
       /**
-       * <code>optional .planner.Place result = 2;</code>
+       * <code>optional .planner.Place result = 3;</code>
        */
       public com.appspot.planner.proto.PlannerProtos.Place.Builder getResultBuilder() {
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000004;
         onChanged();
         return getResultFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .planner.Place result = 2;</code>
+       * <code>optional .planner.Place result = 3;</code>
        */
       public com.appspot.planner.proto.PlannerProtos.PlaceOrBuilder getResultOrBuilder() {
         if (resultBuilder_ != null) {
@@ -16482,7 +17170,7 @@ public final class PlannerProtos {
         }
       }
       /**
-       * <code>optional .planner.Place result = 2;</code>
+       * <code>optional .planner.Place result = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           com.appspot.planner.proto.PlannerProtos.Place, com.appspot.planner.proto.PlannerProtos.Place.Builder, com.appspot.planner.proto.PlannerProtos.PlaceOrBuilder> 
@@ -16500,13 +17188,13 @@ public final class PlannerProtos {
 
       private java.lang.Object status_ = "";
       /**
-       * <code>optional string status = 3;</code>
+       * <code>optional string status = 4;</code>
        */
       public boolean hasStatus() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>optional string status = 3;</code>
+       * <code>optional string status = 4;</code>
        */
       public java.lang.String getStatus() {
         java.lang.Object ref = status_;
@@ -16523,7 +17211,7 @@ public final class PlannerProtos {
         }
       }
       /**
-       * <code>optional string status = 3;</code>
+       * <code>optional string status = 4;</code>
        */
       public com.google.protobuf.ByteString
           getStatusBytes() {
@@ -16539,36 +17227,36 @@ public final class PlannerProtos {
         }
       }
       /**
-       * <code>optional string status = 3;</code>
+       * <code>optional string status = 4;</code>
        */
       public Builder setStatus(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
+  bitField0_ |= 0x00000008;
         status_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string status = 3;</code>
+       * <code>optional string status = 4;</code>
        */
       public Builder clearStatus() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000008);
         status_ = getDefaultInstance().getStatus();
         onChanged();
         return this;
       }
       /**
-       * <code>optional string status = 3;</code>
+       * <code>optional string status = 4;</code>
        */
       public Builder setStatusBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
+  bitField0_ |= 0x00000008;
         status_ = value;
         onChanged();
         return this;
@@ -16590,44 +17278,57 @@ public final class PlannerProtos {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>optional .planner.DebugLog debug_log = 1;</code>
+     */
+    boolean hasDebugLog();
+    /**
+     * <code>optional .planner.DebugLog debug_log = 1;</code>
+     */
+    com.appspot.planner.proto.PlannerProtos.DebugLog getDebugLog();
+    /**
+     * <code>optional .planner.DebugLog debug_log = 1;</code>
+     */
+    com.appspot.planner.proto.PlannerProtos.DebugLogOrBuilder getDebugLogOrBuilder();
+
+    /**
+     * <code>repeated string html_attributions = 2;</code>
      */
     com.google.protobuf.ProtocolStringList
         getHtmlAttributionsList();
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>repeated string html_attributions = 2;</code>
      */
     int getHtmlAttributionsCount();
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>repeated string html_attributions = 2;</code>
      */
     java.lang.String getHtmlAttributions(int index);
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>repeated string html_attributions = 2;</code>
      */
     com.google.protobuf.ByteString
         getHtmlAttributionsBytes(int index);
 
     /**
-     * <code>repeated .planner.Place results = 2;</code>
+     * <code>repeated .planner.Place results = 3;</code>
      */
     java.util.List<com.appspot.planner.proto.PlannerProtos.Place> 
         getResultsList();
     /**
-     * <code>repeated .planner.Place results = 2;</code>
+     * <code>repeated .planner.Place results = 3;</code>
      */
     com.appspot.planner.proto.PlannerProtos.Place getResults(int index);
     /**
-     * <code>repeated .planner.Place results = 2;</code>
+     * <code>repeated .planner.Place results = 3;</code>
      */
     int getResultsCount();
     /**
-     * <code>repeated .planner.Place results = 2;</code>
+     * <code>repeated .planner.Place results = 3;</code>
      */
     java.util.List<? extends com.appspot.planner.proto.PlannerProtos.PlaceOrBuilder> 
         getResultsOrBuilderList();
     /**
-     * <code>repeated .planner.Place results = 2;</code>
+     * <code>repeated .planner.Place results = 3;</code>
      */
     com.appspot.planner.proto.PlannerProtos.PlaceOrBuilder getResultsOrBuilder(
         int index);
@@ -16685,18 +17386,31 @@ public final class PlannerProtos {
               break;
             }
             case 10: {
+              com.appspot.planner.proto.PlannerProtos.DebugLog.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = debugLog_.toBuilder();
+              }
+              debugLog_ = input.readMessage(com.appspot.planner.proto.PlannerProtos.DebugLog.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(debugLog_);
+                debugLog_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+            case 18: {
               com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
                 htmlAttributions_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
+                mutable_bitField0_ |= 0x00000002;
               }
               htmlAttributions_.add(bs);
               break;
             }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+            case 26: {
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
                 results_ = new java.util.ArrayList<com.appspot.planner.proto.PlannerProtos.Place>();
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00000004;
               }
               results_.add(input.readMessage(com.appspot.planner.proto.PlannerProtos.Place.PARSER, extensionRegistry));
               break;
@@ -16709,10 +17423,10 @@ public final class PlannerProtos {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
           htmlAttributions_ = htmlAttributions_.getUnmodifiableView();
         }
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
           results_ = java.util.Collections.unmodifiableList(results_);
         }
         this.unknownFields = unknownFields.build();
@@ -16746,64 +17460,86 @@ public final class PlannerProtos {
       return PARSER;
     }
 
-    public static final int HTML_ATTRIBUTIONS_FIELD_NUMBER = 1;
+    private int bitField0_;
+    public static final int DEBUG_LOG_FIELD_NUMBER = 1;
+    private com.appspot.planner.proto.PlannerProtos.DebugLog debugLog_;
+    /**
+     * <code>optional .planner.DebugLog debug_log = 1;</code>
+     */
+    public boolean hasDebugLog() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional .planner.DebugLog debug_log = 1;</code>
+     */
+    public com.appspot.planner.proto.PlannerProtos.DebugLog getDebugLog() {
+      return debugLog_;
+    }
+    /**
+     * <code>optional .planner.DebugLog debug_log = 1;</code>
+     */
+    public com.appspot.planner.proto.PlannerProtos.DebugLogOrBuilder getDebugLogOrBuilder() {
+      return debugLog_;
+    }
+
+    public static final int HTML_ATTRIBUTIONS_FIELD_NUMBER = 2;
     private com.google.protobuf.LazyStringList htmlAttributions_;
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>repeated string html_attributions = 2;</code>
      */
     public com.google.protobuf.ProtocolStringList
         getHtmlAttributionsList() {
       return htmlAttributions_;
     }
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>repeated string html_attributions = 2;</code>
      */
     public int getHtmlAttributionsCount() {
       return htmlAttributions_.size();
     }
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>repeated string html_attributions = 2;</code>
      */
     public java.lang.String getHtmlAttributions(int index) {
       return htmlAttributions_.get(index);
     }
     /**
-     * <code>repeated string html_attributions = 1;</code>
+     * <code>repeated string html_attributions = 2;</code>
      */
     public com.google.protobuf.ByteString
         getHtmlAttributionsBytes(int index) {
       return htmlAttributions_.getByteString(index);
     }
 
-    public static final int RESULTS_FIELD_NUMBER = 2;
+    public static final int RESULTS_FIELD_NUMBER = 3;
     private java.util.List<com.appspot.planner.proto.PlannerProtos.Place> results_;
     /**
-     * <code>repeated .planner.Place results = 2;</code>
+     * <code>repeated .planner.Place results = 3;</code>
      */
     public java.util.List<com.appspot.planner.proto.PlannerProtos.Place> getResultsList() {
       return results_;
     }
     /**
-     * <code>repeated .planner.Place results = 2;</code>
+     * <code>repeated .planner.Place results = 3;</code>
      */
     public java.util.List<? extends com.appspot.planner.proto.PlannerProtos.PlaceOrBuilder> 
         getResultsOrBuilderList() {
       return results_;
     }
     /**
-     * <code>repeated .planner.Place results = 2;</code>
+     * <code>repeated .planner.Place results = 3;</code>
      */
     public int getResultsCount() {
       return results_.size();
     }
     /**
-     * <code>repeated .planner.Place results = 2;</code>
+     * <code>repeated .planner.Place results = 3;</code>
      */
     public com.appspot.planner.proto.PlannerProtos.Place getResults(int index) {
       return results_.get(index);
     }
     /**
-     * <code>repeated .planner.Place results = 2;</code>
+     * <code>repeated .planner.Place results = 3;</code>
      */
     public com.appspot.planner.proto.PlannerProtos.PlaceOrBuilder getResultsOrBuilder(
         int index) {
@@ -16811,6 +17547,7 @@ public final class PlannerProtos {
     }
 
     private void initFields() {
+      debugLog_ = com.appspot.planner.proto.PlannerProtos.DebugLog.getDefaultInstance();
       htmlAttributions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       results_ = java.util.Collections.emptyList();
     }
@@ -16827,11 +17564,14 @@ public final class PlannerProtos {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeMessage(1, debugLog_);
+      }
       for (int i = 0; i < htmlAttributions_.size(); i++) {
-        output.writeBytes(1, htmlAttributions_.getByteString(i));
+        output.writeBytes(2, htmlAttributions_.getByteString(i));
       }
       for (int i = 0; i < results_.size(); i++) {
-        output.writeMessage(2, results_.get(i));
+        output.writeMessage(3, results_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -16842,6 +17582,10 @@ public final class PlannerProtos {
       if (size != -1) return size;
 
       size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, debugLog_);
+      }
       {
         int dataSize = 0;
         for (int i = 0; i < htmlAttributions_.size(); i++) {
@@ -16853,7 +17597,7 @@ public final class PlannerProtos {
       }
       for (int i = 0; i < results_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, results_.get(i));
+          .computeMessageSize(3, results_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -16964,6 +17708,7 @@ public final class PlannerProtos {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getDebugLogFieldBuilder();
           getResultsFieldBuilder();
         }
       }
@@ -16973,11 +17718,17 @@ public final class PlannerProtos {
 
       public Builder clear() {
         super.clear();
-        htmlAttributions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        if (debugLogBuilder_ == null) {
+          debugLog_ = com.appspot.planner.proto.PlannerProtos.DebugLog.getDefaultInstance();
+        } else {
+          debugLogBuilder_.clear();
+        }
         bitField0_ = (bitField0_ & ~0x00000001);
+        htmlAttributions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
         if (resultsBuilder_ == null) {
           results_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000004);
         } else {
           resultsBuilder_.clear();
         }
@@ -17008,20 +17759,30 @@ public final class PlannerProtos {
       public com.appspot.planner.proto.PlannerProtos.PlaceResult buildPartial() {
         com.appspot.planner.proto.PlannerProtos.PlaceResult result = new com.appspot.planner.proto.PlannerProtos.PlaceResult(this);
         int from_bitField0_ = bitField0_;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        if (debugLogBuilder_ == null) {
+          result.debugLog_ = debugLog_;
+        } else {
+          result.debugLog_ = debugLogBuilder_.build();
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
           htmlAttributions_ = htmlAttributions_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000002);
         }
         result.htmlAttributions_ = htmlAttributions_;
         if (resultsBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          if (((bitField0_ & 0x00000004) == 0x00000004)) {
             results_ = java.util.Collections.unmodifiableList(results_);
-            bitField0_ = (bitField0_ & ~0x00000002);
+            bitField0_ = (bitField0_ & ~0x00000004);
           }
           result.results_ = results_;
         } else {
           result.results_ = resultsBuilder_.build();
         }
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -17037,10 +17798,13 @@ public final class PlannerProtos {
 
       public Builder mergeFrom(com.appspot.planner.proto.PlannerProtos.PlaceResult other) {
         if (other == com.appspot.planner.proto.PlannerProtos.PlaceResult.getDefaultInstance()) return this;
+        if (other.hasDebugLog()) {
+          mergeDebugLog(other.getDebugLog());
+        }
         if (!other.htmlAttributions_.isEmpty()) {
           if (htmlAttributions_.isEmpty()) {
             htmlAttributions_ = other.htmlAttributions_;
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000002);
           } else {
             ensureHtmlAttributionsIsMutable();
             htmlAttributions_.addAll(other.htmlAttributions_);
@@ -17051,7 +17815,7 @@ public final class PlannerProtos {
           if (!other.results_.isEmpty()) {
             if (results_.isEmpty()) {
               results_ = other.results_;
-              bitField0_ = (bitField0_ & ~0x00000002);
+              bitField0_ = (bitField0_ & ~0x00000004);
             } else {
               ensureResultsIsMutable();
               results_.addAll(other.results_);
@@ -17064,7 +17828,7 @@ public final class PlannerProtos {
               resultsBuilder_.dispose();
               resultsBuilder_ = null;
               results_ = other.results_;
-              bitField0_ = (bitField0_ & ~0x00000002);
+              bitField0_ = (bitField0_ & ~0x00000004);
               resultsBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getResultsFieldBuilder() : null;
@@ -17100,41 +17864,157 @@ public final class PlannerProtos {
       }
       private int bitField0_;
 
+      private com.appspot.planner.proto.PlannerProtos.DebugLog debugLog_ = com.appspot.planner.proto.PlannerProtos.DebugLog.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.appspot.planner.proto.PlannerProtos.DebugLog, com.appspot.planner.proto.PlannerProtos.DebugLog.Builder, com.appspot.planner.proto.PlannerProtos.DebugLogOrBuilder> debugLogBuilder_;
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public boolean hasDebugLog() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public com.appspot.planner.proto.PlannerProtos.DebugLog getDebugLog() {
+        if (debugLogBuilder_ == null) {
+          return debugLog_;
+        } else {
+          return debugLogBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public Builder setDebugLog(com.appspot.planner.proto.PlannerProtos.DebugLog value) {
+        if (debugLogBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          debugLog_ = value;
+          onChanged();
+        } else {
+          debugLogBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public Builder setDebugLog(
+          com.appspot.planner.proto.PlannerProtos.DebugLog.Builder builderForValue) {
+        if (debugLogBuilder_ == null) {
+          debugLog_ = builderForValue.build();
+          onChanged();
+        } else {
+          debugLogBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public Builder mergeDebugLog(com.appspot.planner.proto.PlannerProtos.DebugLog value) {
+        if (debugLogBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001) &&
+              debugLog_ != com.appspot.planner.proto.PlannerProtos.DebugLog.getDefaultInstance()) {
+            debugLog_ =
+              com.appspot.planner.proto.PlannerProtos.DebugLog.newBuilder(debugLog_).mergeFrom(value).buildPartial();
+          } else {
+            debugLog_ = value;
+          }
+          onChanged();
+        } else {
+          debugLogBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public Builder clearDebugLog() {
+        if (debugLogBuilder_ == null) {
+          debugLog_ = com.appspot.planner.proto.PlannerProtos.DebugLog.getDefaultInstance();
+          onChanged();
+        } else {
+          debugLogBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public com.appspot.planner.proto.PlannerProtos.DebugLog.Builder getDebugLogBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getDebugLogFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      public com.appspot.planner.proto.PlannerProtos.DebugLogOrBuilder getDebugLogOrBuilder() {
+        if (debugLogBuilder_ != null) {
+          return debugLogBuilder_.getMessageOrBuilder();
+        } else {
+          return debugLog_;
+        }
+      }
+      /**
+       * <code>optional .planner.DebugLog debug_log = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.appspot.planner.proto.PlannerProtos.DebugLog, com.appspot.planner.proto.PlannerProtos.DebugLog.Builder, com.appspot.planner.proto.PlannerProtos.DebugLogOrBuilder> 
+          getDebugLogFieldBuilder() {
+        if (debugLogBuilder_ == null) {
+          debugLogBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.appspot.planner.proto.PlannerProtos.DebugLog, com.appspot.planner.proto.PlannerProtos.DebugLog.Builder, com.appspot.planner.proto.PlannerProtos.DebugLogOrBuilder>(
+                  getDebugLog(),
+                  getParentForChildren(),
+                  isClean());
+          debugLog_ = null;
+        }
+        return debugLogBuilder_;
+      }
+
       private com.google.protobuf.LazyStringList htmlAttributions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureHtmlAttributionsIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
           htmlAttributions_ = new com.google.protobuf.LazyStringArrayList(htmlAttributions_);
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00000002;
          }
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public com.google.protobuf.ProtocolStringList
           getHtmlAttributionsList() {
         return htmlAttributions_.getUnmodifiableView();
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public int getHtmlAttributionsCount() {
         return htmlAttributions_.size();
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public java.lang.String getHtmlAttributions(int index) {
         return htmlAttributions_.get(index);
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public com.google.protobuf.ByteString
           getHtmlAttributionsBytes(int index) {
         return htmlAttributions_.getByteString(index);
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public Builder setHtmlAttributions(
           int index, java.lang.String value) {
@@ -17147,7 +18027,7 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public Builder addHtmlAttributions(
           java.lang.String value) {
@@ -17160,7 +18040,7 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public Builder addAllHtmlAttributions(
           java.lang.Iterable<java.lang.String> values) {
@@ -17171,16 +18051,16 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public Builder clearHtmlAttributions() {
         htmlAttributions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
       /**
-       * <code>repeated string html_attributions = 1;</code>
+       * <code>repeated string html_attributions = 2;</code>
        */
       public Builder addHtmlAttributionsBytes(
           com.google.protobuf.ByteString value) {
@@ -17196,9 +18076,9 @@ public final class PlannerProtos {
       private java.util.List<com.appspot.planner.proto.PlannerProtos.Place> results_ =
         java.util.Collections.emptyList();
       private void ensureResultsIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
           results_ = new java.util.ArrayList<com.appspot.planner.proto.PlannerProtos.Place>(results_);
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000004;
          }
       }
 
@@ -17206,7 +18086,7 @@ public final class PlannerProtos {
           com.appspot.planner.proto.PlannerProtos.Place, com.appspot.planner.proto.PlannerProtos.Place.Builder, com.appspot.planner.proto.PlannerProtos.PlaceOrBuilder> resultsBuilder_;
 
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public java.util.List<com.appspot.planner.proto.PlannerProtos.Place> getResultsList() {
         if (resultsBuilder_ == null) {
@@ -17216,7 +18096,7 @@ public final class PlannerProtos {
         }
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public int getResultsCount() {
         if (resultsBuilder_ == null) {
@@ -17226,7 +18106,7 @@ public final class PlannerProtos {
         }
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public com.appspot.planner.proto.PlannerProtos.Place getResults(int index) {
         if (resultsBuilder_ == null) {
@@ -17236,7 +18116,7 @@ public final class PlannerProtos {
         }
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public Builder setResults(
           int index, com.appspot.planner.proto.PlannerProtos.Place value) {
@@ -17253,7 +18133,7 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public Builder setResults(
           int index, com.appspot.planner.proto.PlannerProtos.Place.Builder builderForValue) {
@@ -17267,7 +18147,7 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public Builder addResults(com.appspot.planner.proto.PlannerProtos.Place value) {
         if (resultsBuilder_ == null) {
@@ -17283,7 +18163,7 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public Builder addResults(
           int index, com.appspot.planner.proto.PlannerProtos.Place value) {
@@ -17300,7 +18180,7 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public Builder addResults(
           com.appspot.planner.proto.PlannerProtos.Place.Builder builderForValue) {
@@ -17314,7 +18194,7 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public Builder addResults(
           int index, com.appspot.planner.proto.PlannerProtos.Place.Builder builderForValue) {
@@ -17328,7 +18208,7 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public Builder addAllResults(
           java.lang.Iterable<? extends com.appspot.planner.proto.PlannerProtos.Place> values) {
@@ -17343,12 +18223,12 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public Builder clearResults() {
         if (resultsBuilder_ == null) {
           results_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000004);
           onChanged();
         } else {
           resultsBuilder_.clear();
@@ -17356,7 +18236,7 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public Builder removeResults(int index) {
         if (resultsBuilder_ == null) {
@@ -17369,14 +18249,14 @@ public final class PlannerProtos {
         return this;
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public com.appspot.planner.proto.PlannerProtos.Place.Builder getResultsBuilder(
           int index) {
         return getResultsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public com.appspot.planner.proto.PlannerProtos.PlaceOrBuilder getResultsOrBuilder(
           int index) {
@@ -17386,7 +18266,7 @@ public final class PlannerProtos {
         }
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public java.util.List<? extends com.appspot.planner.proto.PlannerProtos.PlaceOrBuilder> 
            getResultsOrBuilderList() {
@@ -17397,14 +18277,14 @@ public final class PlannerProtos {
         }
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public com.appspot.planner.proto.PlannerProtos.Place.Builder addResultsBuilder() {
         return getResultsFieldBuilder().addBuilder(
             com.appspot.planner.proto.PlannerProtos.Place.getDefaultInstance());
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public com.appspot.planner.proto.PlannerProtos.Place.Builder addResultsBuilder(
           int index) {
@@ -17412,7 +18292,7 @@ public final class PlannerProtos {
             index, com.appspot.planner.proto.PlannerProtos.Place.getDefaultInstance());
       }
       /**
-       * <code>repeated .planner.Place results = 2;</code>
+       * <code>repeated .planner.Place results = 3;</code>
        */
       public java.util.List<com.appspot.planner.proto.PlannerProtos.Place.Builder> 
            getResultsBuilderList() {
@@ -17425,7 +18305,7 @@ public final class PlannerProtos {
           resultsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               com.appspot.planner.proto.PlannerProtos.Place, com.appspot.planner.proto.PlannerProtos.Place.Builder, com.appspot.planner.proto.PlannerProtos.PlaceOrBuilder>(
                   results_,
-                  ((bitField0_ & 0x00000002) == 0x00000002),
+                  ((bitField0_ & 0x00000004) == 0x00000004),
                   getParentForChildren(),
                   isClean());
           results_ = null;
@@ -22531,6 +23411,11 @@ public final class PlannerProtos {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_planner_Place_Review_Aspect_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_planner_DebugLog_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_planner_DebugLog_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_planner_PlaceDetailResult_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -22617,25 +23502,27 @@ public final class PlannerProtos {
       "e.Review.Aspect\022\023\n\013author_name\030\002 \001(\t\022\022\n\n" +
       "author_url\030\003 \001(\t\022\020\n\010language\030\004 \001(\t\022\016\n\006ra" +
       "ting\030\005 \001(\005\022\014\n\004text\030\006 \001(\t\022\014\n\004time\030\007 \001(\003\032&" +
-      "\n\006Aspect\022\016\n\006rating\030\001 \001(\005\022\014\n\004type\030\002 \001(\t\"^" +
-      "\n\021PlaceDetailResult\022\031\n\021html_attributions",
-      "\030\001 \003(\t\022\036\n\006result\030\002 \001(\0132\016.planner.Place\022\016" +
-      "\n\006status\030\003 \001(\t\"I\n\013PlaceResult\022\031\n\021html_at" +
-      "tributions\030\001 \003(\t\022\037\n\007results\030\002 \003(\0132\016.plan" +
-      "ner.Place\"F\n\007Theater\022\014\n\004name\030\001 \001(\t\022\017\n\007ad" +
-      "dress\030\002 \001(\t\022\034\n\005times\030\003 \003(\0132\r.planner.Tim" +
-      "e\"\274\001\n\005Movie\022\r\n\005image\030\001 \001(\t\022\014\n\004name\030\002 \001(\t" +
-      "\022\017\n\007trailer\030\003 \001(\t\022\014\n\004info\030\004 \001(\t\022\014\n\004desc\030" +
-      "\005 \001(\t\022#\n\010duration\030\006 \001(\0132\021.planner.Durati" +
-      "on\022\020\n\010director\030\007 \001(\t\022\016\n\006actors\030\010 \003(\t\022\"\n\010" +
-      "theaters\030\t \003(\0132\020.planner.Theater\"\247\001\n\010Tim",
-      "eSlot\022\035\n\005event\030\001 \001(\0132\016.planner.Event\022\033\n\004" +
-      "spec\030\002 \001(\0132\r.planner.Spec\022\035\n\005movie\030\003 \001(\013" +
-      "2\016.planner.Movie\022\035\n\005place\030\004 \001(\0132\016.planne" +
-      "r.Place\022!\n\007transit\030\005 \001(\0132\020.planner.Trans" +
-      "it\"+\n\004Plan\022#\n\010schedule\030\001 \003(\0132\021.planner.T" +
-      "imeSlotB*\n\031com.appspot.planner.protoB\rPl" +
-      "annerProtos"
+      "\n\006Aspect\022\016\n\006rating\030\001 \001(\005\022\014\n\004type\030\002 \001(\t\"\030" +
+      "\n\010DebugLog\022\014\n\004line\030\001 \003(\t\"\204\001\n\021PlaceDetail",
+      "Result\022$\n\tdebug_log\030\001 \001(\0132\021.planner.Debu" +
+      "gLog\022\031\n\021html_attributions\030\002 \003(\t\022\036\n\006resul" +
+      "t\030\003 \001(\0132\016.planner.Place\022\016\n\006status\030\004 \001(\t\"" +
+      "o\n\013PlaceResult\022$\n\tdebug_log\030\001 \001(\0132\021.plan" +
+      "ner.DebugLog\022\031\n\021html_attributions\030\002 \003(\t\022" +
+      "\037\n\007results\030\003 \003(\0132\016.planner.Place\"F\n\007Thea" +
+      "ter\022\014\n\004name\030\001 \001(\t\022\017\n\007address\030\002 \001(\t\022\034\n\005ti" +
+      "mes\030\003 \003(\0132\r.planner.Time\"\274\001\n\005Movie\022\r\n\005im" +
+      "age\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\017\n\007trailer\030\003 \001(\t" +
+      "\022\014\n\004info\030\004 \001(\t\022\014\n\004desc\030\005 \001(\t\022#\n\010duration",
+      "\030\006 \001(\0132\021.planner.Duration\022\020\n\010director\030\007 " +
+      "\001(\t\022\016\n\006actors\030\010 \003(\t\022\"\n\010theaters\030\t \003(\0132\020." +
+      "planner.Theater\"\247\001\n\010TimeSlot\022\035\n\005event\030\001 " +
+      "\001(\0132\016.planner.Event\022\033\n\004spec\030\002 \001(\0132\r.plan" +
+      "ner.Spec\022\035\n\005movie\030\003 \001(\0132\016.planner.Movie\022" +
+      "\035\n\005place\030\004 \001(\0132\016.planner.Place\022!\n\007transi" +
+      "t\030\005 \001(\0132\020.planner.Transit\"+\n\004Plan\022#\n\010sch" +
+      "edule\030\001 \003(\0132\021.planner.TimeSlotB*\n\031com.ap" +
+      "pspot.planner.protoB\rPlannerProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -22751,38 +23638,44 @@ public final class PlannerProtos {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_planner_Place_Review_Aspect_descriptor,
         new java.lang.String[] { "Rating", "Type", });
-    internal_static_planner_PlaceDetailResult_descriptor =
+    internal_static_planner_DebugLog_descriptor =
       getDescriptor().getMessageTypes().get(8);
+    internal_static_planner_DebugLog_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_planner_DebugLog_descriptor,
+        new java.lang.String[] { "Line", });
+    internal_static_planner_PlaceDetailResult_descriptor =
+      getDescriptor().getMessageTypes().get(9);
     internal_static_planner_PlaceDetailResult_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_planner_PlaceDetailResult_descriptor,
-        new java.lang.String[] { "HtmlAttributions", "Result", "Status", });
+        new java.lang.String[] { "DebugLog", "HtmlAttributions", "Result", "Status", });
     internal_static_planner_PlaceResult_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_planner_PlaceResult_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_planner_PlaceResult_descriptor,
-        new java.lang.String[] { "HtmlAttributions", "Results", });
+        new java.lang.String[] { "DebugLog", "HtmlAttributions", "Results", });
     internal_static_planner_Theater_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_planner_Theater_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_planner_Theater_descriptor,
         new java.lang.String[] { "Name", "Address", "Times", });
     internal_static_planner_Movie_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_planner_Movie_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_planner_Movie_descriptor,
         new java.lang.String[] { "Image", "Name", "Trailer", "Info", "Desc", "Duration", "Director", "Actors", "Theaters", });
     internal_static_planner_TimeSlot_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_planner_TimeSlot_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_planner_TimeSlot_descriptor,
         new java.lang.String[] { "Event", "Spec", "Movie", "Place", "Transit", });
     internal_static_planner_Plan_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_planner_Plan_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_planner_Plan_descriptor,
