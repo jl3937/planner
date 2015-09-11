@@ -86,8 +86,9 @@ public class Planner {
                   break;
                 } else if (hourMinute < openTime) {
                   open = true;
-                  eventStartTime = time + TimeUnit.MILLISECONDS.convert((openTime - hourMinute) / 100, TimeUnit.HOURS) +
-                      TimeUnit.MILLISECONDS.convert((openTime - hourMinute) % 100, TimeUnit.MINUTES);
+                  eventStartTime = time + TimeUnit.MILLISECONDS.convert((openTime / 100 - hourMinute / 100), TimeUnit
+                      .HOURS) +
+                      TimeUnit.MILLISECONDS.convert((openTime % 100 - hourMinute % 100), TimeUnit.MINUTES);
                   break;
                 }
               }
