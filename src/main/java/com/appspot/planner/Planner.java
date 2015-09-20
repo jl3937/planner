@@ -71,6 +71,9 @@ public class Planner {
       int day = calendar.get(Calendar.DAY_OF_WEEK);
       if (event.getType() == Event.Type.PLACE || event.getType() == Event.Type.FOOD) {
         Geometry.Location location = this.googleGeoAPI.getLocation(previousLoc);
+        if (location == null) {
+          return "Invalid location: " + previousLoc;
+        }
         PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.getContent(), location, DEFAULT_RADIUS, event
             .getType());
         int hour = calendar.get(Calendar.HOUR_OF_DAY);

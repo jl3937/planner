@@ -10,7 +10,6 @@ public class GoogleGeoAPI {
   private static final String GEOCODE_API_URL = "https://maps" + ".googleapis.com/maps/api/geocode/json";
   private static final String PLACE_SEARCH_API_URL = "https://maps.googleapis" + "" +
       ".com/maps/api/place/radarsearch/json";
-
   private static final String PLACE_DETAIL_API_URL = "https://maps.googleapis" + ".com/maps/api/place/details/json";
 
   public GoogleGeoAPI() {
@@ -41,7 +40,11 @@ public class GoogleGeoAPI {
     GeocodeResults.Builder builder = GeocodeResults.newBuilder();
     try {
       JsonFormat.merge(json, builder);
-      return builder.build().getResults(0).getGeometry().getLocation();
+      GeocodeResults results = builder.build();
+      if (results.getResultsCount() == 0) {
+        return null;
+      }
+      return results.getResults(0).getGeometry().getLocation();
     } catch (JsonFormat.ParseException e) {
       e.printStackTrace();
     }
