@@ -23,6 +23,7 @@ public class Planner {
 
   public static final long DEFAULT_PLACE_TIME = 600000;
   public static final long DEFAULT_FOOD_TIME = 3600000;
+  public static final int DEFAULT_RADIUS = 10000;  // in meters
 
   public Planner() {
     this.googleGeoAPI = new GoogleGeoAPI();
@@ -69,7 +70,9 @@ public class Planner {
       calendar.setTimeInMillis(time);
       int day = calendar.get(Calendar.DAY_OF_WEEK);
       if (event.getType() == Event.Type.PLACE || event.getType() == Event.Type.FOOD) {
-        PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.getContent(), previousLoc);
+        Geometry.Location location = this.googleGeoAPI.getLocation(previousLoc);
+        PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.getContent(), location, DEFAULT_RADIUS, event
+            .getType());
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
         int hourMinute = hour * 100 + minute;

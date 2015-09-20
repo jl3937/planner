@@ -72,16 +72,31 @@ message DistanceMatrixResult {
   repeated Row rows = 4;
 }
 
+
+message Geometry {
+  message Location {
+    optional double lat = 1;
+    optional double lng = 2;
+  }
+  message Area {
+    optional Location northeast = 1;
+    optional Location southwest = 2;
+  }
+  optional Area bounds = 1;
+  optional Location location = 2;
+  optional Area viewport = 3;
+}
+
+message GeocodeResults {
+  message GeocodeResult {
+    optional Geometry geometry = 1;
+  }
+  repeated GeocodeResult results = 1;
+}
+
 message Place {
   optional string formatted_address = 1;
   optional string formatted_phone_number = 2;
-  message Geometry {
-    message Location {
-      optional double lat = 1;
-      optional double lng = 2;
-    }
-    optional Location location = 1;
-  }
   optional Geometry geometry = 3;
   optional string icon = 4;
   optional string international_phone_number = 5;
