@@ -103,8 +103,8 @@ public class Planner {
               continue;
             }
           }
-          eventLoc = result.getFormattedAddress();
-          eventContent = result.getName();
+          eventLoc = selectedPlace.getFormattedAddress();
+          eventContent = selectedPlace.getName();
           if (event.getType() == Event.Type.FOOD) {
             duration = DEFAULT_FOOD_TIME;
           } else {
