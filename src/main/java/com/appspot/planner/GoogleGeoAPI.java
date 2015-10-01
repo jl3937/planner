@@ -12,13 +12,10 @@ public class GoogleGeoAPI {
       ".com/maps/api/place/radarsearch/json";
   private static final String PLACE_DETAIL_API_URL = "https://maps.googleapis" + ".com/maps/api/place/details/json";
 
-  public GoogleGeoAPI() {
-  }
-
-  public DistanceMatrixResult getDuration(String origin, String destination, String mode) {
+  static public DistanceMatrixResult getDuration(Location origin, Location destination, String mode) {
     UrlFetcher urlFetcher = new UrlFetcher(DISTANCE_MATRIX_API_URL);
-    urlFetcher.addParameter("origins", origin);
-    urlFetcher.addParameter("destinations", destination);
+    urlFetcher.addParameter("origins", origin.getAddress());
+    urlFetcher.addParameter("destinations", destination.getAddress());
     urlFetcher.addParameter("mode", mode);
     urlFetcher.addParameter("key", API_KEY);
     String json = urlFetcher.getResult();
@@ -32,9 +29,12 @@ public class GoogleGeoAPI {
     return null;
   }
 
-  public Geometry.Location getLocation(String address) {
-        UrlFetcher urlFetcher = new UrlFetcher(GEOCODE_API_URL);
-    urlFetcher.addParameter("address", address);
+  static public Location getLocation(Location location) {
+    if (location.hasCoordinate() || !location.hasAddress()) {
+      return location;
+    }
+    UrlFetcher urlFetcher = new UrlFetcher(GEOCODE_API_URL);
+    urlFetcher.addParameter("address", location.getAddress());
     urlFetcher.addParameter("key", API_KEY);
     String json = urlFetcher.getResult();
     GeocodeResults.Builder builder = GeocodeResults.newBuilder();
@@ -44,16 +44,17 @@ public class GoogleGeoAPI {
       if (results.getResultsCount() == 0) {
         return null;
       }
-      return results.getResults(0).getGeometry().getLocation();
+      return Location.newBuilder().mergeFrom(location).setCoordinate(results.getResults(0).getGeometry().getLocation
+          ()).build();
     } catch (JsonFormat.ParseException e) {
       e.printStackTrace();
     }
     return null;
   }
 
-  public PlaceResult searchPlace(String keyword, Geometry.Location location, int radius, Event.Type type) {
+  static public PlaceResult searchPlace(String keyword, Location location, int radius, Event.Type type) {
     UrlFetcher urlFetcher = new UrlFetcher(PLACE_SEARCH_API_URL);
-    urlFetcher.addParameter("location", location.getLat() + "," + location.getLng());
+    urlFetcher.addParameter("location", location.getCoordinate().getLat() + "," + location.getCoordinate().getLng());
     urlFetcher.addParameter("radius", String.valueOf(radius));
     urlFetcher.addParameter("keyword", keyword);
     if (type == Event.Type.FOOD) {
@@ -71,7 +72,7 @@ public class GoogleGeoAPI {
     return null;
   }
 
-  public PlaceDetailResult getPlaceDetail(String placeid) {
+  static public PlaceDetailResult getPlaceDetail(String placeid) {
     UrlFetcher urlFetcher = new UrlFetcher(PLACE_DETAIL_API_URL);
     urlFetcher.addParameter("placeid", placeid);
     urlFetcher.addParameter("key", API_KEY);

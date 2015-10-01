@@ -1,6 +1,7 @@
 package com.appspot.planner;
 
 import com.appspot.planner.proto.PlannerProtos.*;
+import com.appspot.planner.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -9,29 +10,18 @@ import com.googlecode.protobuf.format.JsonFormat;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 @Path("plan")
 public class Planner {
-  GoogleGeoAPI googleGeoAPI;
-  GoogleMovieCrawler googleMovieCrawler;
-
-  public static final long DEFAULT_PLACE_TIME = 600000;
-  public static final long DEFAULT_FOOD_TIME = 3600000;
-  public static final int DEFAULT_RADIUS = 10000;  // in meters
-
-  public Planner() {
-    this.googleGeoAPI = new GoogleGeoAPI();
-    this.googleMovieCrawler = new GoogleMovieCrawler();
-  }
+  public static final int DEFAULT_SEARCH_RADIUS = 50000;  // in meters
+  public static final int LOOKUP_COUNT = 5;
 
   @POST
   public String getPlan(String jsonRequest) {
+    // Parse request
     GetPlanRequest request;
     try {
       GetPlanRequest.Builder requestBuilder = GetPlanRequest.newBuilder();
@@ -42,8 +32,13 @@ public class Planner {
       return "Invalid request.";
     }
 
-    Plan.Builder response = Plan.newBuilder();
-    String previousLoc = request.getRequirement().getStartLoc();
+    // Check input
+    if (request.getRequirement().hasMinPriceLevel() && request.getRequirement().hasMaxPriceLevel() &&
+        request.getRequirement().getMinPriceLevel() > request.getRequirement().getMaxPriceLevel()) {
+      return "Invalid request. min_price_level should be less than or equal to max_price_level.";
+    }
+
+    // Get time and location
     Calendar calendar;
     if (request.hasTimeZone()) {
       calendar = Calendar.getInstance(TimeZone.getTimeZone(request.getTimeZone()));
@@ -51,17 +46,26 @@ public class Planner {
       // By default, use system time zone.
       calendar = Calendar.getInstance();
     }
-    int dayOfToday = calendar.get(Calendar.DAY_OF_WEEK);
-    TimeZone timeZone = calendar.getTimeZone();
-    long time;
-    if (request.getRequirement().getStartTime().hasValue()) {
-      time = request.getRequirement().getStartTime().getValue();
-    } else {
-      // By default, use current time.
-      time = calendar.getTimeInMillis();
+    if (request.getRequirement().getTimePeriod().getStartTime().hasValue()) {
+      calendar.setTimeInMillis(request.getRequirement().getTimePeriod().getStartTime().getValue());
     }
+
+    // Get candidates for each event
+    GetPlanResponse.Builder response = GetPlanResponse.newBuilder();
     for (Event event : request.getEventList()) {
-      String eventLoc = "";
+      response.addProcessedEvent(processEvent(event, request.getRequirement().getStartLoc(), calendar));
+    }
+
+    // Get available schedule.
+    Scheduler scheduler = new Scheduler(request, response, calendar);
+    response = scheduler.getSchedule();
+
+    /*
+    long time = calendar.getTimeInMillis();
+    int dayOfToday = calendar.get(Calendar.DAY_OF_WEEK);
+    Location previousLoc = request.getRequirement().getStartLoc();
+    for (Event event : request.getEventList()) {
+      Location eventLoc = null;
       String eventContent = "";
       Place selectedPlace = null;
       Movie selectedMovie = null;
@@ -70,17 +74,17 @@ public class Planner {
       calendar.setTimeInMillis(time);
       int day = calendar.get(Calendar.DAY_OF_WEEK);
       if (event.getType() == Event.Type.PLACE || event.getType() == Event.Type.FOOD) {
-        Geometry.Location location = this.googleGeoAPI.getLocation(previousLoc);
+        Location location = GoogleGeoAPI.getLocation(previousLoc);
         if (location == null) {
           return "Invalid location: " + previousLoc;
         }
-        PlaceResult placeResult = this.googleGeoAPI.searchPlace(event.getContent(), location, DEFAULT_RADIUS, event
+        PlaceResult placeResult = GoogleGeoAPI.searchPlace(event.getContent(), location, DEFAULT_SEARCH_RADIUS, event
             .getType());
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
         int hourMinute = hour * 100 + minute;
         for (Place result : placeResult.getResultsList()) {
-          selectedPlace = this.googleGeoAPI.getPlaceDetail(result.getPlaceId()).getResult();
+          selectedPlace = GoogleGeoAPI.getPlaceDetail(result.getPlaceId()).getResult();
           boolean open = false;
           if (selectedPlace.hasOpeningHours()) {
             for (Place.OpeningHours.Period period : selectedPlace.getOpeningHours().getPeriodsList()) {
@@ -103,7 +107,7 @@ public class Planner {
               continue;
             }
           }
-          eventLoc = selectedPlace.getFormattedAddress();
+          eventLoc = Location.newBuilder().setAddress(selectedPlace.getFormattedAddress()).build();
           eventContent = selectedPlace.getName();
           if (event.getType() == Event.Type.FOOD) {
             duration = DEFAULT_FOOD_TIME;
@@ -113,14 +117,14 @@ public class Planner {
           break;
         }
       } else if (event.getType() == Event.Type.MOVIE) {
-        ArrayList<Movie> movieResults = this.googleMovieCrawler.searchMovie(event.getContent(), previousLoc, day -
+        ArrayList<Movie> movieResults = GoogleMovieCrawler.searchMovie(event.getContent(), previousLoc, day -
             dayOfToday, calendar);
         for (Movie movie : movieResults) {
           for (Theater theater : movie.getTheatersList()) {
             if (theater.getTimesCount() == 0 || theater.getTimes(0).getValue() < time) {
               continue;
             }
-            eventLoc = theater.getAddress();
+            eventLoc = Location.newBuilder().setAddress(theater.getAddress()).build();
             eventContent = theater.getName();
             selectedMovie = movie;
             eventStartTime = theater.getTimes(0).getValue();
@@ -130,12 +134,13 @@ public class Planner {
         }
       }
 
-      if (eventLoc.isEmpty()) {
+      if (eventLoc == null) {
         continue;
       }
 
-      DistanceMatrixResult result = this.googleGeoAPI.getDuration(previousLoc, eventLoc, request.getRequirement()
+      DistanceMatrixResult result = GoogleGeoAPI.getDuration(previousLoc, eventLoc, request.getRequirement()
           .getTravelMode().name().toLowerCase());
+      System.out.println(Util.getEstimatedDuration(previousLoc, eventLoc).getValue());
       Transit selectedTransit = null;
       for (Transit transit : result.getRows(0).getElementsList()) {
         selectedTransit = transit;
@@ -144,40 +149,44 @@ public class Planner {
 
       TimeSlot.Builder timeSlot = TimeSlot.newBuilder();
       timeSlot.getEventBuilder().setType(Event.Type.TRANSPORT);
-      timeSlot.getSpecBuilder().setStartTime(Time.newBuilder().setValue(time).setText(timeToString(time, timeZone)));
+      Spec.Builder spec = timeSlot.getSpecBuilder();
+      TimePeriod.Builder timePeriod = spec.getTimePeriodBuilder();
+      timePeriod.setStartTime(Util.getTimeFromTimestamp(time, calendar));
       time += TimeUnit.MILLISECONDS.convert(selectedTransit.getDuration().getValue(), TimeUnit.SECONDS);
-      timeSlot.getSpecBuilder().setEndTime(Time.newBuilder().setValue(time).setText(timeToString(time, timeZone)))
-          .setStartLoc(previousLoc).setEndLoc(eventLoc).setTravelMode(request.getRequirement().getTravelMode());
+      timePeriod.setEndTime(Util.getTimeFromTimestamp(time, calendar));
+      spec.setStartLoc(previousLoc).setEndLoc(eventLoc).setTravelMode(request.getRequirement().getTravelMode());
       timeSlot.setTransit(selectedTransit);
       response.addSchedule(timeSlot.build());
 
+
       timeSlot = TimeSlot.newBuilder();
       timeSlot.getEventBuilder().setContent(eventContent).setType(event.getType());
+      spec = timeSlot.getSpecBuilder();
+      timePeriod = spec.getTimePeriodBuilder();
       if (eventStartTime != 0) {
         time = eventStartTime;
       }
-
-      timeSlot.getSpecBuilder().getStartTimeBuilder().setValue(time).setText(timeToString(time, timeZone));
+      timePeriod.setStartTime(Util.getTimeFromTimestamp(time, calendar));
       time += duration;
-      timeSlot.getSpecBuilder().getEndTimeBuilder().setValue(time).setText(timeToString(time, timeZone));
-      timeSlot.getSpecBuilder().setStartLoc(eventLoc).setEndLoc(eventLoc);
+      timePeriod.setEndTime(Util.getTimeFromTimestamp(time, calendar));
+      spec.setStartLoc(eventLoc).setEndLoc(eventLoc);
       if (selectedPlace != null) {
-        timeSlot.setPlace(selectedPlace);
+        // timeSlot.setPlace(selectedPlace);
       }
       if (selectedMovie != null) {
-        timeSlot.setMovie(selectedMovie);
+        // timeSlot.setMovie(selectedMovie);
       }
       response.addSchedule(timeSlot.build());
       previousLoc = eventLoc;
     }
 
-    String endLoc;
+    Location endLoc;
     if (request.getRequirement().hasEndLoc()) {
       endLoc = request.getRequirement().getEndLoc();
     } else {
       endLoc = request.getRequirement().getStartLoc();
     }
-    DistanceMatrixResult result = this.googleGeoAPI.getDuration(previousLoc, endLoc, request.getRequirement()
+    DistanceMatrixResult result = GoogleGeoAPI.getDuration(previousLoc, endLoc, request.getRequirement()
         .getTravelMode().name().toLowerCase());
     Transit selectedTransit = null;
     for (Transit transit : result.getRows(0).getElementsList()) {
@@ -191,14 +200,15 @@ public class Planner {
 
     TimeSlot.Builder timeSlot = TimeSlot.newBuilder();
     timeSlot.getEventBuilder().setType(Event.Type.TRANSPORT);
-    timeSlot.getSpecBuilder().getStartTimeBuilder().setValue(time).setText(timeToString(time, timeZone));
+    Spec.Builder spec = timeSlot.getSpecBuilder();
+    TimePeriod.Builder timePeriod = spec.getTimePeriodBuilder();
+    timePeriod.setStartTime(Util.getTimeFromTimestamp(time, calendar));
     time += TimeUnit.MILLISECONDS.convert(selectedTransit.getDuration().getValue(), TimeUnit.SECONDS);
-    timeSlot.getSpecBuilder().getEndTimeBuilder().setValue(time).setText(timeToString(time, timeZone));
-    timeSlot.getSpecBuilder().setStartLoc(previousLoc).setEndLoc(endLoc).setTravelMode(request.getRequirement()
-        .getTravelMode());
+    timePeriod.setEndTime(Util.getTimeFromTimestamp(time, calendar));
+    spec.setStartLoc(previousLoc).setEndLoc(endLoc).setTravelMode(request.getRequirement().getTravelMode());
     timeSlot.setTransit(selectedTransit);
     response.addSchedule(timeSlot);
-
+    */
     String responseJson = JsonFormat.printToString(response.build());
     JsonParser parser = new JsonParser();
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -206,11 +216,83 @@ public class Planner {
     return gson.toJson(el);
   }
 
-  private String timeToString(long timestamp, TimeZone timeZone) {
-    SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mmaa");
-    dateFormat.setTimeZone(timeZone);
-    Date date = new Date();
-    date.setTime(timestamp);
-    return dateFormat.format(date);
+  private Event processEvent(Event event, Location location, Calendar calendar) {
+    Event.Builder processedEvent = Event.newBuilder().mergeFrom(event);
+    int day = calendar.get(Calendar.DAY_OF_WEEK);
+    long time = calendar.getTimeInMillis();
+    if (event.getType() == Event.Type.PLACE || event.getType() == Event.Type.FOOD) {
+      location = GoogleGeoAPI.getLocation(location);
+      if (location == null) {
+        return null;
+      }
+      PlaceResult placeResult = GoogleGeoAPI.searchPlace(event.getContent(), location, DEFAULT_SEARCH_RADIUS, event
+          .getType());
+      int hour = calendar.get(Calendar.HOUR_OF_DAY);
+      int minute = calendar.get(Calendar.MINUTE);
+      int hourMinute = hour * 100 + minute;
+      int lookupCount = 0;
+      for (Place place : placeResult.getResultsList()) {
+        if (lookupCount++ == LOOKUP_COUNT) {
+          break;
+        }
+        place = GoogleGeoAPI.getPlaceDetail(place.getPlaceId()).getResult();
+        if (place.hasOpeningHours()) {
+          for (Place.OpeningHours.Period period : place.getOpeningHours().getPeriodsList()) {
+            if (period.getOpen().getDay() == day - 1) {
+              int openTime = Integer.parseInt(period.getOpen().getTime());
+              int closeTime = Integer.parseInt(period.getClose().getTime());
+              if (openTime <= hourMinute && hourMinute < closeTime) {
+                TimeSlot.Builder candidate = TimeSlot.newBuilder();
+                candidate.getSpecBuilder().getTimePeriodBuilder().setStartTime(Util.getTimeByHourMinute(hourMinute,
+                    time, hourMinute, calendar)).setEndTime(Util.getTimeByHourMinute(closeTime, time, hourMinute,
+                    calendar));
+                candidate.getEventBuilder().setContent(place.getName()).setType(event.getType());
+                candidate.getSpecBuilder().getStartLocBuilder().setCoordinate(place.getGeometry().getLocation())
+                    .setAddress(place.getFormattedAddress());
+                candidate.getSpecBuilder().setRating(place.getRating()).setPriceLevel(place.getPriceLevel());
+                // candidate.setPlace(place);
+                processedEvent.addCandicates(candidate);
+              } else if (hourMinute < openTime) {
+                TimeSlot.Builder candidate = TimeSlot.newBuilder();
+                candidate.getSpecBuilder().getTimePeriodBuilder().setStartTime(Util.getTimeByHourMinute(openTime,
+                    time, hourMinute, calendar)).setEndTime(Util.getTimeByHourMinute(closeTime, time, hourMinute,
+                    calendar));
+                candidate.getEventBuilder().setContent(place.getName()).setType(event.getType());
+                candidate.getSpecBuilder().getStartLocBuilder().setCoordinate(place.getGeometry().getLocation())
+                    .setAddress(place.getFormattedAddress());
+                candidate.getSpecBuilder().setRating(place.getRating()).setPriceLevel(place.getPriceLevel());
+                // candidate.setPlace(place);
+                processedEvent.addCandicates(candidate);
+              }
+            }
+          }
+        }
+      }
+    } else if (event.getType() == Event.Type.MOVIE) {
+      int dayOfToday = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+      ArrayList<Movie> movieResults = GoogleMovieCrawler.searchMovie(event.getContent(), location, day - dayOfToday,
+          calendar);
+      for (Movie movie : movieResults) {
+        for (Theater theater : movie.getTheatersList()) {
+          if (theater.getTimesCount() == 0 || theater.getTimes(0).getValue() < time) {
+            continue;
+          }
+          Location startLocation = Location.newBuilder().setAddress(theater.getAddress()).build();
+          startLocation = GoogleGeoAPI.getLocation(startLocation);
+          for (Time startTime : theater.getTimesList()) {
+            TimeSlot.Builder candidate = TimeSlot.newBuilder();
+            candidate.getEventBuilder().setContent(theater.getName()).setType(event.getType());
+            // candidate.setMovie(movie);
+            candidate.getSpecBuilder().setStartLoc(startLocation);
+            TimePeriod.Builder timePeriod = candidate.getSpecBuilder().getTimePeriodBuilder();
+            timePeriod.setStartTime(startTime);
+            timePeriod.setEndTime(Util.getTimeFromTimestamp(startTime.getValue() + movie.getDuration().getValue(),
+                calendar));
+            processedEvent.addCandicates(candidate);
+          }
+        }
+      }
+    }
+    return processedEvent.build();
   }
 }

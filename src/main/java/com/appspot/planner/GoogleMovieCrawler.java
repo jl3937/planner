@@ -18,13 +18,10 @@ import java.util.regex.Pattern;
 public class GoogleMovieCrawler {
   private static final String GOOGLE_MOVIE_URL = "http://www.google.com/movies";
 
-  public GoogleMovieCrawler() {
-  }
-
-  public ArrayList<Movie> searchMovie(String name, String loc, int date, Calendar calendar) {
+  static public ArrayList<Movie> searchMovie(String name, Location loc, int date, Calendar calendar) {
     UrlFetcher urlFetcher = new UrlFetcher(GOOGLE_MOVIE_URL);
     urlFetcher.addParameter("q", name);
-    urlFetcher.addParameter("near", loc);
+    urlFetcher.addParameter("near", loc.getAddress());
     urlFetcher.addParameter("date", String.valueOf(date));
     String result = urlFetcher.getResult();
     Document doc = Jsoup.parse(result);
@@ -107,7 +104,7 @@ public class GoogleMovieCrawler {
     return movies;
   }
 
-  private long parseDuration(String text) {
+  static private long parseDuration(String text) {
     long milliseconds = 0;
     Pattern pattern = Pattern.compile("(\\d+)hr\\s+(\\d+)min");
     Matcher matcher = pattern.matcher(text);
@@ -120,7 +117,8 @@ public class GoogleMovieCrawler {
     return milliseconds;
   }
 
-  private long parseTime(String text, Calendar calendar) {
+  static private long parseTime(String text, Calendar calendar) {
+    long originalTime = calendar.getTimeInMillis();
     Pattern pattern = Pattern.compile("(\\d+):(\\d+)(\\w+)");
     Matcher matcher = pattern.matcher(text);
     if (matcher.find() && matcher.groupCount() == 3) {
@@ -137,7 +135,9 @@ public class GoogleMovieCrawler {
       calendar.set(Calendar.MINUTE, minute);
       calendar.set(Calendar.SECOND, 0);
       calendar.set(Calendar.MILLISECOND, 0);
-      return calendar.getTimeInMillis();
+      long time = calendar.getTimeInMillis();
+      calendar.setTimeInMillis(originalTime);
+      return time;
     }
     return 0;
   }

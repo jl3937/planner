@@ -45,7 +45,7 @@ public class UrlFetcher {
         result += line + "\n";
       }
       reader.close();
-      System.out.println(result);
+      // System.out.println(result);
     } catch (MalformedURLException e) {
     } catch (IOException e) {
     }

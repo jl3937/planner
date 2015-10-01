@@ -11,13 +11,30 @@ message Time {
   optional string text = 2;
 }
 
-message Spec {
+message TimePeriod {
   optional Time start_time = 1;
   optional Time end_time = 2;
-  optional string start_loc = 3;
-  optional string end_loc = 4;
-  optional int32 price_level = 5;
-  optional int32 num_people = 6;
+}
+
+message Coordinate {
+  optional double lat = 1;
+  optional double lng = 2;
+}
+
+message Location {
+  optional string address = 1;
+  optional Coordinate coordinate = 2;
+}
+
+message Spec {
+  optional TimePeriod time_period = 1;
+  optional Location start_loc = 2;
+  optional Location end_loc = 3;
+  optional double price_level = 4;
+  optional int32 min_price_level = 5;
+  optional int32 max_price_level = 6;
+  optional double rating = 7;
+  optional int32 min_rating = 8;
 
   enum TravelMode {
     DRIVING = 0;
@@ -25,7 +42,18 @@ message Spec {
     BICYCLING = 2;
     TRANSIT = 3;
   }
-  optional TravelMode travel_mode = 7;
+  optional TravelMode travel_mode = 9;
+}
+
+message TimeSlot {
+  optional Event event = 1;
+  optional Spec spec = 2;
+
+  // Only one of below is set for each time slot.
+  // TODO: use oneof.
+  optional Movie movie = 3;
+  optional Place place = 4;
+  optional Transit transit = 5;
 }
 
 message Event {
@@ -39,6 +67,7 @@ message Event {
   optional Type type = 2;
   optional Spec requirement = 3;
   repeated string avoid = 4;
+  repeated TimeSlot candicates = 5;
 }
 
 message GetPlanRequest {
@@ -72,18 +101,13 @@ message DistanceMatrixResult {
   repeated Row rows = 4;
 }
 
-
 message Geometry {
-  message Location {
-    optional double lat = 1;
-    optional double lng = 2;
-  }
   message Area {
-    optional Location northeast = 1;
-    optional Location southwest = 2;
+    optional Coordinate northeast = 1;
+    optional Coordinate southwest = 2;
   }
   optional Area bounds = 1;
-  optional Location location = 2;
+  optional Coordinate location = 2;
   optional Area viewport = 3;
 }
 
@@ -95,14 +119,20 @@ message GeocodeResults {
 }
 
 message Place {
-  optional string formatted_address = 1;
-  optional string formatted_phone_number = 2;
-  optional Geometry geometry = 3;
-  optional string icon = 4;
-  optional string international_phone_number = 5;
-  optional string name = 6;
-  optional int32 price_level = 7;
-  optional double rating = 8;
+  message AddressComponent {
+    optional string long_name = 1;
+    optional string short_name = 2;
+    repeated string types = 3;
+  }
+  repeated AddressComponent address_components = 1;
+  optional string formatted_address = 2;
+  optional string formatted_phone_number = 3;
+  optional Geometry geometry = 4;
+  optional string icon = 5;
+  optional string international_phone_number = 6;
+  optional string name = 7;
+  optional int32 price_level = 8;
+  optional double rating = 9;
   message OpeningHours {
     optional bool open_now = 1;
     repeated string weekday_text = 2;
@@ -116,7 +146,7 @@ message Place {
     }
     repeated Period periods = 3;
   }
-  optional OpeningHours opening_hours = 9;
+  optional OpeningHours opening_hours = 10;
   message Review {
     message Aspect {
       optional int32 rating = 1;
@@ -130,12 +160,12 @@ message Place {
     optional string text = 6;
     optional int64 time = 7;
   }
-  repeated Review reviews = 10;
-  repeated string types = 11;
-  optional string url = 12;
-  optional int32 user_rating_total = 13;
-  optional string website = 14;
-  optional string place_id = 15;
+  repeated Review reviews = 11;
+  repeated string types = 12;
+  optional string url = 13;
+  optional int32 user_rating_total = 14;
+  optional string website = 15;
+  optional string place_id = 16;
 }
 
 message DebugLog {
@@ -173,17 +203,15 @@ message Movie {
   repeated Theater theaters = 9;
 }
 
-message TimeSlot {
-  optional Event event = 1;
+message Schedule {
+  repeated TimeSlot timeSlot = 1;
   optional Spec spec = 2;
-
-  // Only one of below is set for each time slot.
-  // TODO: use oneof.
-  optional Movie movie = 3;
-  optional Place place = 4;
-  optional Transit transit = 5;
+  optional bool tight = 3;
+  optional double score = 4;
 }
 
-message Plan {
-  repeated TimeSlot schedule = 1;
+message GetPlanResponse {
+  optional Schedule schedule = 1;
+  repeated Schedule schedule_candidate = 2;
+  repeated Event processed_event = 3;
 }
