@@ -56,12 +56,12 @@ public class Scheduler {
         permutation[i] = i;
       }
       do {
-        Schedule schedule = trySchedule(false);
+        Schedule schedule = trySchedule(false, false);
         if (schedule != null) {
           response.addScheduleCandidate(schedule);
           continue;
         }
-        schedule = trySchedule(true);
+        schedule = trySchedule(true, false);
         if (schedule != null) {
           response.addScheduleCandidate(schedule);
         }
@@ -73,12 +73,18 @@ public class Scheduler {
         best = schedule;
       }
     }
-    response.setSchedule(best);
+    recoverStatus(best);
+    best = trySchedule(best.getTight(), true);
+    if (best != null) {
+      response.setSchedule(best);
+    }
     return response;
   }
 
   // Return null if can't schedule
-  private Schedule trySchedule(boolean tight) {
+  // Allow MIN_DURATION if tight is true
+  // Use actual GeoMatrix to compute transport duration if accurate is true
+  private Schedule trySchedule(boolean tight, boolean accurate) {
     Schedule.Builder schedule = Schedule.newBuilder();
     long time = startTimestamp;
     Location previousLoc = startLoc;
@@ -86,13 +92,16 @@ public class Scheduler {
     int ratingCount = 0;
     double priceLevelSum = 0;
     int priceLevelCount = 0;
+    long transportDuration = 0;
     for (int i = 0; i < eventCount; ++i) {
       Event event = response.getProcessedEvent(permutation[i]);
       TimeSlot candidate = event.getCandicates(index[permutation[i]]);
       Location eventLoc = candidate.getSpec().getStartLoc();
       // Add transport
-      long duration = Util.getEstimatedDuration(previousLoc, eventLoc);
-      time = addTimeSlot(time, duration, null, previousLoc, eventLoc, schedule);
+      long duration = accurate ? GoogleGeoAPI.getDuration(previousLoc, eventLoc, request.getRequirement()
+          .getTravelMode().toString()) : Util.getEstimatedDuration(previousLoc, eventLoc);
+      transportDuration += duration;
+      time = addTimeSlot(time, duration, previousLoc, eventLoc, null, schedule);
       // Add event
       if (time < candidate.getSpec().getTimePeriod().getStartTime().getValue()) {
         time = candidate.getSpec().getTimePeriod().getStartTime().getValue();
@@ -101,7 +110,7 @@ public class Scheduler {
       if (duration < 0) {
         return null;
       }
-      time = addTimeSlot(time, duration, candidate.getEvent(), eventLoc, eventLoc, schedule);
+      time = addTimeSlot(time, duration, eventLoc, null, candidate, schedule);
       previousLoc = eventLoc;
       if (candidate.getSpec().getRating() != 0) {
         ratingSum += candidate.getSpec().getRating();
@@ -112,16 +121,18 @@ public class Scheduler {
         ++priceLevelCount;
       }
     }
-    long duration = Util.getEstimatedDuration(previousLoc, endLoc);
-    time = addTimeSlot(time, duration, null, previousLoc, endLoc, schedule);
+    long duration = accurate ? GoogleGeoAPI.getDuration(previousLoc, endLoc, request.getRequirement().getTravelMode()
+        .toString()) : Util.getEstimatedDuration(previousLoc, endLoc);
+    transportDuration += transportDuration;
+    time = addTimeSlot(time, duration, previousLoc, endLoc, null, schedule);
     if (endTimestamp > 0 && time > endTimestamp) {
       return null;
     }
     schedule.getSpecBuilder().getTimePeriodBuilder().setStartTime(Util.getTimeFromTimestamp(startTimestamp, calendar)
     ).setEndTime(Util.getTimeFromTimestamp(time, calendar));
-    if (ratingCount > 0) {
-      schedule.getSpecBuilder().setRating(ratingSum / ratingCount);
-    }
+    transportDuration -= Util.getEstimatedDuration(startLoc, endLoc);
+    schedule.setTransportDuration(transportDuration);
+    schedule.getSpecBuilder().setRating(ratingCount > 0 ? (ratingSum / ratingCount) : 3);
     if (priceLevelCount > 0) {
       schedule.getSpecBuilder().setPriceLevel(priceLevelSum / priceLevelCount);
     }
@@ -129,17 +140,30 @@ public class Scheduler {
       schedule.setTight(true);
     }
     schedule.setScore(computeScore(schedule));
+    if (!accurate) {
+      storeStatus(schedule);
+    }
     return schedule.build();
   }
 
-  private double computeScore(Schedule.Builder schedule) {
-    long duration = schedule.getSpec().getTimePeriod().getEndTime().getValue() - schedule.getSpec().getTimePeriod()
-        .getStartTime().getValue();
-    double score = 24 - TimeUnit.HOURS.convert(duration, TimeUnit.MILLISECONDS);
-    if (schedule.getSpec().getRating() != 0) {
-      // half hour is in parity with 1 point.
-      score += schedule.getSpec().getRating() / 2;
+  private void storeStatus(Schedule.Builder schedule) {
+    for (int i = 0; i < eventCount; ++i) {
+      schedule.addIndex(index[i]);
+      schedule.addPermutation(permutation[i]);
     }
+  }
+
+  private void recoverStatus(Schedule schedule) {
+    for (int i = 0; i < eventCount; ++i) {
+      index[i] = schedule.getIndex(i);
+      permutation[i] = schedule.getPermutation(i);
+    }
+  }
+
+  private double computeScore(Schedule.Builder schedule) {
+    // half hour is in parity with 1 point.
+    double score = schedule.getSpec().getRating() / 2 - TimeUnit.HOURS.convert(schedule.getTransportDuration(),
+        TimeUnit.MILLISECONDS);
     if (schedule.getTight() == true) {
       score -= 1;
     }
@@ -173,15 +197,21 @@ public class Scheduler {
   }
 
   // Return end time in milli second.
-  private long addTimeSlot(long startTime, long duration, Event event, Location startLoc, Location endLoc, Schedule
-      .Builder schedule) {
+  private long addTimeSlot(long startTime, long duration, Location startLoc, Location endLoc, TimeSlot fromTimeSlot,
+                           Schedule.Builder schedule) {
     long endTime = startTime + duration;
     TimeSlot.Builder timeSlot = TimeSlot.newBuilder();
     timeSlot.getSpecBuilder().getTimePeriodBuilder().setStartTime(Util.getTimeFromTimestamp(startTime, calendar))
         .setEndTime(Util.getTimeFromTimestamp(endTime, calendar));
-    timeSlot.getSpecBuilder().setStartLoc(startLoc).setEndLoc(endLoc);
-    if (event != null) {
-      timeSlot.getEventBuilder().setContent(event.getContent()).setType(event.getType());
+    timeSlot.getSpecBuilder().setStartLoc(startLoc);
+    if (endLoc != null) {
+      timeSlot.getSpecBuilder().setEndLoc(endLoc);
+    }
+    if (fromTimeSlot != null) {
+      timeSlot.getEventBuilder().setContent(fromTimeSlot.getEvent().getContent()).setType(fromTimeSlot.getEvent()
+          .getType());
+      timeSlot.getSpecBuilder().setPriceLevel(fromTimeSlot.getSpec().getPriceLevel()).setRating(fromTimeSlot.getSpec
+          ().getRating());
     } else {
       timeSlot.getEventBuilder().setType(Event.Type.TRANSPORT);
     }

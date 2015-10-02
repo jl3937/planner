@@ -4,6 +4,8 @@ import com.appspot.planner.proto.PlannerProtos.*;
 import com.appspot.planner.util.UrlFetcher;
 import com.googlecode.protobuf.format.JsonFormat;
 
+import java.util.concurrent.TimeUnit;
+
 public class GoogleGeoAPI {
   private static final String API_KEY = "AIzaSyAD6lYA1_7oUGMAPkRJ3duNIlPRuzohvNw";
   private static final String DISTANCE_MATRIX_API_URL = "https://maps" + ".googleapis.com/maps/api/distancematrix/json";
@@ -12,7 +14,7 @@ public class GoogleGeoAPI {
       ".com/maps/api/place/radarsearch/json";
   private static final String PLACE_DETAIL_API_URL = "https://maps.googleapis" + ".com/maps/api/place/details/json";
 
-  static public DistanceMatrixResult getDuration(Location origin, Location destination, String mode) {
+  static public long getDuration(Location origin, Location destination, String mode) {
     UrlFetcher urlFetcher = new UrlFetcher(DISTANCE_MATRIX_API_URL);
     urlFetcher.addParameter("origins", origin.getAddress());
     urlFetcher.addParameter("destinations", destination.getAddress());
@@ -22,11 +24,18 @@ public class GoogleGeoAPI {
     DistanceMatrixResult.Builder builder = DistanceMatrixResult.newBuilder();
     try {
       JsonFormat.merge(json, builder);
-      return builder.build();
+      DistanceMatrixResult result = builder.build();
+      long minDuration = -1;
+      for (Transit transit : result.getRows(0).getElementsList()) {
+        if (minDuration == -1 || transit.getDuration().getValue() < minDuration) {
+          minDuration = transit.getDuration().getValue();
+        }
+      }
+      return TimeUnit.MILLISECONDS.convert(minDuration, TimeUnit.SECONDS);
     } catch (JsonFormat.ParseException e) {
       e.printStackTrace();
     }
-    return null;
+    return 0;
   }
 
   static public Location getLocation(Location location) {

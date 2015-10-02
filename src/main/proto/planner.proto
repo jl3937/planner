@@ -206,8 +206,11 @@ message Movie {
 message Schedule {
   repeated TimeSlot timeSlot = 1;
   optional Spec spec = 2;
-  optional bool tight = 3;
-  optional double score = 4;
+  optional int64 transport_duration = 3;
+  optional bool tight = 4;
+  optional double score = 5;
+  repeated int32 index = 6;
+  repeated int32 permutation = 7;
 }
 
 message GetPlanResponse {
