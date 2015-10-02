@@ -17,8 +17,9 @@ public class Scheduler {
   GetPlanResponse.Builder response;
   Calendar calendar;
   int eventCount;
-  int[] index;
+  int[] index;  // index of candidate
   int[] size;
+  int[] permutation;  // index of event
   Location startLoc;
   Location endLoc;
   long startTimestamp;
@@ -31,6 +32,7 @@ public class Scheduler {
     eventCount = response.getProcessedEventCount();
     index = new int[eventCount];
     size = new int[eventCount];
+    permutation = new int[eventCount];
     for (int i = 0; i < eventCount; ++i) {
       index[i] = 0;
       size[i] = response.getProcessedEvent(i).getCandicatesCount();
@@ -50,16 +52,21 @@ public class Scheduler {
       }
     }
     do {
-      Schedule schedule = trySchedule(false);
-      if (schedule != null) {
-        response.addScheduleCandidate(schedule);
-        continue;
+      for (int i = 0; i < eventCount; ++i) {
+        permutation[i] = i;
       }
-      schedule = trySchedule(true);
-      if (schedule != null) {
-        response.addScheduleCandidate(schedule);
-      }
-    } while (getNextIndex(size, index));
+      do {
+        Schedule schedule = trySchedule(false);
+        if (schedule != null) {
+          response.addScheduleCandidate(schedule);
+          continue;
+        }
+        schedule = trySchedule(true);
+        if (schedule != null) {
+          response.addScheduleCandidate(schedule);
+        }
+      } while (getNextPermutation());
+    } while (getNextIndex());
     Schedule best = null;
     for (Schedule schedule : response.getScheduleCandidateList()) {
       if (best == null || schedule.getScore() > best.getScore()) {
@@ -80,8 +87,8 @@ public class Scheduler {
     double priceLevelSum = 0;
     int priceLevelCount = 0;
     for (int i = 0; i < eventCount; ++i) {
-      Event.Type eventType = response.getProcessedEvent(i).getType();
-      TimeSlot candidate = response.getProcessedEvent(i).getCandicates(index[i]);
+      Event event = response.getProcessedEvent(permutation[i]);
+      TimeSlot candidate = event.getCandicates(index[permutation[i]]);
       Location eventLoc = candidate.getSpec().getStartLoc();
       // Add transport
       long duration = Util.getEstimatedDuration(previousLoc, eventLoc);
@@ -90,7 +97,7 @@ public class Scheduler {
       if (time < candidate.getSpec().getTimePeriod().getStartTime().getValue()) {
         time = candidate.getSpec().getTimePeriod().getStartTime().getValue();
       }
-      duration = getEventDuration(eventType, time, candidate, tight);
+      duration = getEventDuration(event.getType(), time, candidate, tight);
       if (duration < 0) {
         return null;
       }
@@ -182,7 +189,42 @@ public class Scheduler {
     return endTime;
   }
 
-  private boolean getNextIndex(int[] size, int[] index) {
+  private void swap(int i, int j) {
+    int tmp = permutation[i];
+    permutation[i] = permutation[j];
+    permutation[j] = tmp;
+  }
+
+  private boolean getNextPermutation() {
+    if (eventCount == 1) {
+      return false;
+    }
+    int k = -1;
+    for (int i = 0; i < eventCount - 1; ++i) {
+      if (permutation[i] < permutation[i + 1]) {
+        k = i;
+      }
+    }
+    if (k == -1) {
+      return false;
+    }
+    int l = k + 1;
+    for (int i = k + 2; i < eventCount; ++i) {
+      if (permutation[k] < permutation[i]) {
+        l = i;
+      }
+    }
+    swap(k, l);
+    int m = k + 1, n = eventCount - 1;
+    while (m < n) {
+      swap(m, n);
+      m++;
+      n--;
+    }
+    return true;
+  }
+
+  private boolean getNextIndex() {
     for (int i = size.length - 1; i >= 0; --i) {
       if (index[i] + 1 < size[i]) {
         index[i] = index[i] + 1;
