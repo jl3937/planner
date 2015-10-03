@@ -209,8 +209,10 @@ public class Planner {
     timeSlot.setTransit(selectedTransit);
     response.addSchedule(timeSlot);
     */
-    response.clearScheduleCandidate();
-    response.clearProcessedEvent();
+    if (response.hasSchedule()) {
+      response.clearScheduleCandidate();
+      response.clearProcessedEvent();
+    }
     String responseJson = JsonFormat.printToString(response.build());
     JsonParser parser = new JsonParser();
     Gson gson = new GsonBuilder().setPrettyPrinting().create();

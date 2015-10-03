@@ -67,6 +67,9 @@ public class Scheduler {
         }
       } while (getNextPermutation());
     } while (getNextIndex());
+    if (response.getScheduleCandidateCount() == 0) {
+      return response;
+    }
     Schedule best = null;
     for (Schedule schedule : response.getScheduleCandidateList()) {
       if (best == null || schedule.getScore() > best.getScore()) {

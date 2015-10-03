@@ -56,6 +56,10 @@ public class Util {
       calendar) {
     long time = curTime + TimeUnit.MILLISECONDS.convert((hourMinute / 100 - curHourMinute / 100), TimeUnit.HOURS) +
         TimeUnit.MILLISECONDS.convert((hourMinute % 100 - curHourMinute % 100), TimeUnit.MINUTES);
+    // hourMinute indicates the second day.
+    if (hourMinute < curHourMinute) {
+      time += TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS);
+    }
     return Util.getTimeFromTimestamp(time, calendar);
   }
 }
