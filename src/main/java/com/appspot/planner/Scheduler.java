@@ -215,6 +215,7 @@ public class Scheduler {
           .getType());
       timeSlot.getSpecBuilder().setPriceLevel(fromTimeSlot.getSpec().getPriceLevel()).setRating(fromTimeSlot.getSpec
           ().getRating());
+      timeSlot.getSpecBuilder().addAllTypes(fromTimeSlot.getSpec().getTypesList());
     } else {
       timeSlot.getEventBuilder().setType(Event.Type.TRANSPORT);
     }
