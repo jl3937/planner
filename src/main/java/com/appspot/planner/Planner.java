@@ -61,7 +61,7 @@ public class Planner {
     // Get candidates for each event
     GetPlanResponse.Builder response = GetPlanResponse.newBuilder();
     for (Event event : request.getEventList()) {
-      response.addProcessedEvent(processEvent(event, request.getRequirement().getStartLoc(), calendar));
+      response.addProcessedEvent(processEvent(event, request.getRequirement(), calendar));
     }
 
     // Get available schedule.
@@ -80,7 +80,9 @@ public class Planner {
     return gson.toJson(el);
   }
 
-  private Event processEvent(Event event, Location location, Calendar calendar) {
+  private Event processEvent(Event event, Requirement requirement, Calendar calendar) {
+    Location location = requirement.getStartLoc();
+    int radius = requirement.hasRadius() ? requirement.getRadius() : DEFAULT_SEARCH_RADIUS;
     Event.Builder processedEvent = Event.newBuilder().mergeFrom(event);
     int day = calendar.get(Calendar.DAY_OF_WEEK);
     long time = calendar.getTimeInMillis();
@@ -89,8 +91,7 @@ public class Planner {
       if (location == null) {
         return null;
       }
-      PlaceResult placeResult = GoogleGeoAPI.searchPlace(event.getContent(), location, DEFAULT_SEARCH_RADIUS, event
-          .getType());
+      PlaceResult placeResult = GoogleGeoAPI.searchPlace(event.getContent(), location, radius, event.getType());
       int hour = calendar.get(Calendar.HOUR_OF_DAY);
       int minute = calendar.get(Calendar.MINUTE);
       int hourMinute = hour * 100 + minute;

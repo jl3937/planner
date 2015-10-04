@@ -26,26 +26,32 @@ message Location {
   optional Coordinate coordinate = 2;
 }
 
-message Spec {
+message Requirement {
   optional TimePeriod time_period = 1;
-  optional TimePeriod available_time_period = 2;
-  optional Location start_loc = 3;
-  optional Location end_loc = 4;
-  optional double price_level = 5;
-  optional int32 min_price_level = 6;
-  optional int32 max_price_level = 7;
-  optional double rating = 8;
-  optional int32 min_rating = 9;
-  repeated string types = 10;
-
+  optional Location start_loc = 2;
+  optional Location end_loc = 3;
+  optional int32 min_price_level = 4;
+  optional int32 max_price_level = 5;
+  optional int32 min_rating = 6;
+  optional int32 radius = 7;
   enum TravelMode {
     DRIVING = 0;
     WALKING = 1;
     BICYCLING = 2;
     TRANSIT = 3;
   }
-  optional TravelMode travel_mode = 11;
-  optional int64 suggested_duration = 12;
+  optional TravelMode travel_mode = 8;
+}
+
+message Spec {
+  optional TimePeriod time_period = 1;
+  optional TimePeriod available_time_period = 2;
+  optional Location start_loc = 3;
+  optional Location end_loc = 4;
+  optional double price_level = 5;
+  optional double rating = 6;
+  repeated string types = 7;
+  optional int64 suggested_duration = 8;
 }
 
 message TimeSlot {
@@ -76,7 +82,7 @@ message Event {
 message GetPlanRequest {
   optional string time_zone = 1;
   repeated Event event = 2;
-  optional Spec requirement = 3;
+  optional Requirement requirement = 3;
 }
 
 message Duration {
