@@ -38,7 +38,7 @@ public class Util {
   }
 
   public static long getEstimatedDuration(Location location1, Location location2) {
-    return (long) (getDistance(location1, location2) * 1.212 / METERS_PER_MILLI);
+    return (long) (getDistance(location1, location2) * 1.414 / METERS_PER_MILLI);
   }
 
   public static PlannerProtos.Time getTimeFromTimestamp(long timestamp, Calendar calendar) {

@@ -4,13 +4,9 @@ import com.appspot.planner.proto.PlannerProtos.*;
 import com.appspot.planner.util.Util;
 
 import java.util.Calendar;
-import java.util.concurrent.TimeUnit;
 
 public class Scheduler {
-  public static final long DEFAULT_PLACE_DURATION = 600000;  // 10 min
-  public static final long MIN_PLACE_DURATION = 300000;  // 5 min
-  public static final long DEFAULT_FOOD_DURATION = 3600000;  // 1 hour
-  public static final long MIN_FOOD_DURATION = 1800000;  // 30 min
+
   public static final long MOVIE_LATE_THRESHOLD = 900000;  // 15 min
 
   GetPlanRequest request;
@@ -77,15 +73,24 @@ public class Scheduler {
       }
     }
     recoverStatus(best);
-    best = trySchedule(best.getTight(), true);
-    if (best != null) {
-      response.setSchedule(best);
+    Schedule bestAccurate = trySchedule(best.getTight(), true);
+    if (bestAccurate != null) {
+      response.setSchedule(bestAccurate);
+    } else if (!best.getTight()) {
+      bestAccurate = trySchedule(true, true);
+      if (bestAccurate != null) {
+        response.setSchedule(bestAccurate);
+      } else {
+        // response.setSchedule(best);
+      }
+    } else {
+      // response.setSchedule(best);
     }
     return response;
   }
 
   // Return null if can't schedule
-  // Allow MIN_DURATION if tight is true
+  // Allow half duration if tight is true
   // Use actual GeoMatrix to compute transport duration if accurate is true
   private Schedule trySchedule(boolean tight, boolean accurate) {
     Schedule.Builder schedule = Schedule.newBuilder();
@@ -131,8 +136,12 @@ public class Scheduler {
     if (endTimestamp > 0 && time > endTimestamp) {
       return null;
     }
-    schedule.getSpecBuilder().getTimePeriodBuilder().setStartTime(Util.getTimeFromTimestamp(startTimestamp, calendar)
-    ).setEndTime(Util.getTimeFromTimestamp(time, calendar));
+
+    long optimizedStartTimestamp = OptimizeSchedule(schedule);
+
+    // Write summary
+    schedule.getSpecBuilder().getTimePeriodBuilder().setStartTime(Util.getTimeFromTimestamp(optimizedStartTimestamp,
+        calendar)).setEndTime(Util.getTimeFromTimestamp(time, calendar));
     transportDuration -= Util.getEstimatedDuration(startLoc, endLoc);
     schedule.setTransportDuration(transportDuration);
     schedule.getSpecBuilder().setRating(ratingCount > 0 ? (ratingSum / ratingCount) : 3);
@@ -147,6 +156,78 @@ public class Scheduler {
       storeStatus(schedule);
     }
     return schedule.build();
+  }
+
+  private long OptimizeSchedule(Schedule.Builder schedule) {
+    long newStartTimestamp = startTimestamp;
+    for (int i = schedule.getTimeSlotCount() - 3; i >= 0; --i) {
+      TimeSlot.Builder timeSlot = schedule.getTimeSlotBuilder(i);
+      TimeSlot.Builder nextTimeSlot = schedule.getTimeSlotBuilder(i + 1);
+      if (timeSlot.getEvent().getType() != Event.Type.TRANSPORT) {
+        long extend = Math.min(timeSlot.getSpec().getSuggestedDuration() - getEndTime(timeSlot) + getStartTime
+            (timeSlot), Math.min(getCloseTime(timeSlot) - getEndTime(timeSlot), getStartTime(nextTimeSlot) -
+            getEndTime(timeSlot)));
+        if (extend > 0) {
+          addEndTime(timeSlot, extend);
+        } else {
+          long delay = Math.min(getStartTime(nextTimeSlot) - getEndTime(timeSlot), getCloseTime(timeSlot) -
+              getEndTime(timeSlot));
+          if (delay > 0) {
+            addStartTime(timeSlot, delay);
+            addEndTime(timeSlot, delay);
+          }
+        }
+      } else {
+        long delay = getStartTime(nextTimeSlot) - getEndTime(timeSlot);
+        if (delay > 0) {
+          addStartTime(timeSlot, delay);
+          addEndTime(timeSlot, delay);
+        }
+      }
+      newStartTimestamp = getStartTime(timeSlot);
+    }
+    for (int i = 2; i < schedule.getTimeSlotCount(); ++i) {
+      TimeSlot.Builder timeSlot = schedule.getTimeSlotBuilder(i);
+      TimeSlot.Builder lastTimeSlot = schedule.getTimeSlotBuilder(i - 1);
+      long gap;
+      if (timeSlot.getEvent().getType() != Event.Type.TRANSPORT) {
+        gap = Math.min(getStartTime(timeSlot) - getEndTime(lastTimeSlot), getStartTime(timeSlot) - getOpenTime
+            (timeSlot));
+      } else {
+        gap = getStartTime(timeSlot) - getEndTime(lastTimeSlot);
+      }
+      if (gap > 0) {
+        addStartTime(timeSlot, 0 - gap);
+        addEndTime(timeSlot, 0 - gap);
+      }
+    }
+    return newStartTimestamp;
+  }
+
+  private long getStartTime(TimeSlot.Builder timeSlot) {
+    return timeSlot.getSpec().getTimePeriod().getStartTime().getValue();
+  }
+
+  private long getEndTime(TimeSlot.Builder timeSlot) {
+    return timeSlot.getSpec().getTimePeriod().getEndTime().getValue();
+  }
+
+  private long getOpenTime(TimeSlot.Builder timeSlot) {
+    return timeSlot.getSpec().getAvailableTimePeriod().getStartTime().getValue();
+  }
+
+  private long getCloseTime(TimeSlot.Builder timeSlot) {
+    return timeSlot.getSpec().getAvailableTimePeriod().getEndTime().getValue();
+  }
+
+  private void addStartTime(TimeSlot.Builder timeSlot, long delta) {
+    timeSlot.getSpecBuilder().getTimePeriodBuilder().setStartTime(Util.getTimeFromTimestamp(timeSlot.getSpec()
+        .getTimePeriod().getStartTime().getValue() + delta, calendar));
+  }
+
+  private void addEndTime(TimeSlot.Builder timeSlot, long delta) {
+    timeSlot.getSpecBuilder().getTimePeriodBuilder().setEndTime(Util.getTimeFromTimestamp(timeSlot.getSpec()
+        .getTimePeriod().getEndTime().getValue() + delta, calendar));
   }
 
   private void storeStatus(Schedule.Builder schedule) {
@@ -164,37 +245,29 @@ public class Scheduler {
   }
 
   private double computeScore(Schedule.Builder schedule) {
-    // half hour is in parity with 1 point.
-    double score = schedule.getSpec().getRating() / 2 - TimeUnit.HOURS.convert(schedule.getTransportDuration(),
-        TimeUnit.MILLISECONDS);
+    double score = schedule.getSpec().getRating() - (schedule.getSpec().getTimePeriod().getEndTime().getValue() -
+        startTimestamp + schedule.getTransportDuration()) / 3600000.0;
     if (schedule.getTight() == true) {
-      score -= 1;
+      score -= eventCount;
     }
     return score;
   }
 
   // Return -1 if can't schedule
-  private long getEventDuration(Event.Type type, long time, TimeSlot candidate, boolean tight) {
+  private long getEventDuration(Event.Type eventType, long time, TimeSlot candidate, boolean tight) {
     long endTime = candidate.getSpec().getTimePeriod().getEndTime().getValue();
-    long duration = 0;
-    if (type == Event.Type.FOOD) {
-      duration = Math.min(tight ? MIN_FOOD_DURATION : DEFAULT_FOOD_DURATION, endTime - time);
-      if (duration < MIN_FOOD_DURATION) {
-        return -1;
-      }
-    } else if (type == Event.Type.PLACE) {
-      duration = Math.min(tight ? MIN_PLACE_DURATION : DEFAULT_PLACE_DURATION, endTime - time);
-      if (duration < MIN_PLACE_DURATION) {
-        return -1;
-      }
-    } else if (type == Event.Type.MOVIE) {
+    if (eventType == Event.Type.MOVIE) {
       if (time - candidate.getSpec().getTimePeriod().getStartTime().getValue() > MOVIE_LATE_THRESHOLD) {
         return -1;
       }
-      duration = endTime - time;
-      if (duration < 0) {
-        return -1;
-      }
+      return endTime - time;
+    }
+    long duration = candidate.getSpec().getSuggestedDuration();
+    if (tight) {
+      duration /= 2;
+    }
+    if (endTime - time < duration) {
+      return -1;
     }
     return duration;
   }
@@ -203,7 +276,7 @@ public class Scheduler {
   private long addTimeSlot(long startTime, long duration, Location startLoc, Location endLoc, TimeSlot fromTimeSlot,
                            Schedule.Builder schedule) {
     long endTime = startTime + duration;
-    TimeSlot.Builder timeSlot = TimeSlot.newBuilder();
+    TimeSlot.Builder timeSlot = schedule.addTimeSlotBuilder();
     timeSlot.getSpecBuilder().getTimePeriodBuilder().setStartTime(Util.getTimeFromTimestamp(startTime, calendar))
         .setEndTime(Util.getTimeFromTimestamp(endTime, calendar));
     timeSlot.getSpecBuilder().setStartLoc(startLoc);
@@ -216,10 +289,11 @@ public class Scheduler {
       timeSlot.getSpecBuilder().setPriceLevel(fromTimeSlot.getSpec().getPriceLevel()).setRating(fromTimeSlot.getSpec
           ().getRating());
       timeSlot.getSpecBuilder().addAllTypes(fromTimeSlot.getSpec().getTypesList());
+      timeSlot.getSpecBuilder().setAvailableTimePeriod(fromTimeSlot.getSpec().getTimePeriod());
+      timeSlot.getSpecBuilder().setSuggestedDuration(fromTimeSlot.getSpec().getSuggestedDuration());
     } else {
       timeSlot.getEventBuilder().setType(Event.Type.TRANSPORT);
     }
-    schedule.addTimeSlot(timeSlot.build());
     return endTime;
   }
 

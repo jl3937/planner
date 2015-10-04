@@ -48,6 +48,14 @@ public class Planner {
     }
     if (request.getRequirement().getTimePeriod().getStartTime().hasValue()) {
       calendar.setTimeInMillis(request.getRequirement().getTimePeriod().getStartTime().getValue());
+    } else {
+      /*
+      calendar.set(Calendar.DAY_OF_YEAR, calendar.get(Calendar.DAY_OF_YEAR) + 1);
+      calendar.set(Calendar.HOUR_OF_DAY, 8);
+      calendar.set(Calendar.MINUTE, 0);
+      calendar.set(Calendar.SECOND, 0);
+      calendar.set(Calendar.MILLISECOND, 0);
+      */
     }
 
     // Get candidates for each event
@@ -113,7 +121,7 @@ public class Planner {
             }
             if (startTime != -1) {
               TimeSlot.Builder candidate = TimeSlot.newBuilder();
-              candidate.getSpecBuilder().getTimePeriodBuilder().setStartTime(Util.getTimeByHourMinute(hourMinute,
+              candidate.getSpecBuilder().getTimePeriodBuilder().setStartTime(Util.getTimeByHourMinute(startTime,
                   time, hourMinute, calendar)).setEndTime(Util.getTimeByHourMinute(endTime, time, hourMinute,
                   calendar));
               candidate.getEventBuilder().setContent(place.getName()).setType(event.getType());
@@ -121,6 +129,7 @@ public class Planner {
                   .setAddress(place.getFormattedAddress());
               candidate.getSpecBuilder().setRating(place.getRating()).setPriceLevel(place.getPriceLevel());
               candidate.getSpecBuilder().addAllTypes(place.getTypesList());
+              candidate.getSpecBuilder().setSuggestedDuration(Config.getInstance().getSuggestedDuration(candidate));
               // candidate.setPlace(place);
               processedEvent.addCandicates(candidate);
             }
