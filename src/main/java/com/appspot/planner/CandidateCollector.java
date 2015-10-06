@@ -32,74 +32,39 @@ public class CandidateCollector {
     Location location = requirement.getStartLoc();
     int radius = requirement.hasRadius() ? requirement.getRadius() : DEFAULT_SEARCH_RADIUS;
     Event.Builder processedEvent = Event.newBuilder().mergeFrom(event);
-    int day = calendar.get(Calendar.DAY_OF_WEEK);
+    int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
     long time = calendar.getTimeInMillis();
     if (event.getType() == Event.Type.PLACE || event.getType() == Event.Type.FOOD) {
       location = GoogleGeoAPI.getLocation(location);
       if (location == null) {
         return null;
       }
-      PlaceResult placeResult = GoogleGeoAPI.searchPlace(event.getContent(), location, radius, event.getType());
       int hour = calendar.get(Calendar.HOUR_OF_DAY);
       int minute = calendar.get(Calendar.MINUTE);
       int hourMinute = hour * 100 + minute;
       int lookupCount = 0;
-      for (Place place : placeResult.getResultsList()) {
+      PlaceResult startPlaceResult = GoogleGeoAPI.searchPlace(event.getContent(), location, radius, event.getType());
+      for (Place place : startPlaceResult.getResultsList()) {
         if (lookupCount++ == LOOKUP_COUNT) {
           break;
         }
-        place = GoogleGeoAPI.getPlaceDetail(place.getPlaceId()).getResult();
-        if (place.hasRating() && requirement.hasMinRating() && requirement.getMinRating() > place.getRating()) {
-          continue;
-        }
-        if (place.hasPriceLevel()) {
-          if (requirement.hasMinPriceLevel() && requirement.getMinPriceLevel() > place.getPriceLevel()) {
-            continue;
+        lookupPlace(place.getPlaceId(), dayOfWeek, hourMinute, processedEvent);
+      }
+      if (requirement.hasEndLoc() && !requirement.getEndLoc().getAddress().equals(requirement.getStartLoc()
+          .getAddress())) {
+        lookupCount = 0;
+        PlaceResult endPlaceResult = GoogleGeoAPI.searchPlace(event.getContent(), location, radius, event.getType());
+        for (Place place : endPlaceResult.getResultsList()) {
+          if (lookupCount++ == LOOKUP_COUNT) {
+            break;
           }
-          if (requirement.hasMaxPriceLevel() && requirement.getMaxPriceLevel() < place.getPriceLevel()) {
-            continue;
-          }
-        }
-        if (place.hasOpeningHours()) {
-          for (Place.OpeningHours.Period period : place.getOpeningHours().getPeriodsList()) {
-            int startTime = -1;
-            int endTime = -1;
-            if (period.getOpen().getDay() == 0 && period.getOpen().getTime().equals("0000") && !period.hasClose()) {
-              // Open 7 days 24 hours
-              startTime = hourMinute;
-              endTime = 2359;
-            } else if (period.getOpen().getDay() == day - 1) {
-              int openTime = Integer.parseInt(period.getOpen().getTime());
-              int closeTime = Integer.parseInt(period.getClose().getTime());
-              if (openTime <= hourMinute && hourMinute < closeTime) {
-                startTime = hourMinute;
-                endTime = closeTime;
-              } else if (hourMinute < openTime) {
-                startTime = openTime;
-                endTime = closeTime;
-              }
-            }
-            if (startTime != -1) {
-              TimeSlot.Builder candidate = TimeSlot.newBuilder();
-              candidate.getSpecBuilder().getTimePeriodBuilder().setStartTime(Util.getTimeByHourMinute(startTime,
-                  time, hourMinute, calendar)).setEndTime(Util.getTimeByHourMinute(endTime, time, hourMinute,
-                  calendar));
-              candidate.getEventBuilder().setContent(place.getName()).setType(event.getType());
-              candidate.getSpecBuilder().getStartLocBuilder().setCoordinate(place.getGeometry().getLocation())
-                  .setAddress(place.getFormattedAddress());
-              candidate.getSpecBuilder().setRating(place.getRating()).setPriceLevel(place.getPriceLevel());
-              candidate.getSpecBuilder().addAllTypes(place.getTypesList());
-              candidate.getSpecBuilder().setSuggestedDuration(Config.getInstance().getSuggestedDuration(candidate));
-              // candidate.setPlace(place);
-              processedEvent.addCandicates(candidate);
-            }
-          }
+          lookupPlace(place.getPlaceId(), dayOfWeek, hourMinute, processedEvent);
         }
       }
     } else if (event.getType() == Event.Type.MOVIE) {
-      int dayOfToday = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
-      ArrayList<Movie> movieResults = GoogleMovieCrawler.searchMovie(event.getContent(), location, day - dayOfToday,
-          calendar);
+      int dayOfToday = Calendar.getInstance(calendar.getTimeZone()).get(Calendar.DAY_OF_WEEK);
+      ArrayList<Movie> movieResults = GoogleMovieCrawler.searchMovie(event.getContent(), location, dayOfWeek -
+          dayOfToday, calendar);
       for (Movie movie : movieResults) {
         for (Theater theater : movie.getTheatersList()) {
           if (theater.getTimesCount() == 0 || theater.getTimes(0).getValue() < time) {
@@ -122,5 +87,55 @@ public class CandidateCollector {
       }
     }
     return processedEvent.build();
+  }
+
+  private void lookupPlace(String placeId, int dayOfWeek, int hourMinute, Event.Builder processedEvent) {
+    Place place = GoogleGeoAPI.getPlaceDetail(placeId).getResult();
+    if (place.hasRating() && requirement.hasMinRating() && requirement.getMinRating() > place.getRating()) {
+      return;
+    }
+    if (place.hasPriceLevel()) {
+      if (requirement.hasMinPriceLevel() && requirement.getMinPriceLevel() > place.getPriceLevel()) {
+        return;
+      }
+      if (requirement.hasMaxPriceLevel() && requirement.getMaxPriceLevel() < place.getPriceLevel()) {
+        return;
+      }
+    }
+    if (place.hasOpeningHours()) {
+      for (Place.OpeningHours.Period period : place.getOpeningHours().getPeriodsList()) {
+        int startTime = -1;
+        int endTime = -1;
+        if (period.getOpen().getDay() == 0 && period.getOpen().getTime().equals("0000") && !period.hasClose()) {
+          // Open 7 days 24 hours
+          startTime = hourMinute;
+          endTime = 2359;
+        } else if (period.getOpen().getDay() == dayOfWeek - 1) {
+          int openTime = Integer.parseInt(period.getOpen().getTime());
+          int closeTime = Integer.parseInt(period.getClose().getTime());
+          if (openTime <= hourMinute && hourMinute < closeTime) {
+            startTime = hourMinute;
+            endTime = closeTime;
+          } else if (hourMinute < openTime) {
+            startTime = openTime;
+            endTime = closeTime;
+          }
+        }
+        if (startTime != -1) {
+          long time = calendar.getTimeInMillis();
+          TimeSlot.Builder candidate = TimeSlot.newBuilder();
+          candidate.getSpecBuilder().getTimePeriodBuilder().setStartTime(Util.getTimeByHourMinute(startTime, time,
+              hourMinute, calendar)).setEndTime(Util.getTimeByHourMinute(endTime, time, hourMinute, calendar));
+          candidate.getEventBuilder().setContent(place.getName()).setType(processedEvent.getType());
+          candidate.getSpecBuilder().getStartLocBuilder().setCoordinate(place.getGeometry().getLocation()).setAddress
+              (place.getFormattedAddress());
+          candidate.getSpecBuilder().setRating(place.getRating()).setPriceLevel(place.getPriceLevel());
+          candidate.getSpecBuilder().addAllTypes(place.getTypesList());
+          candidate.getSpecBuilder().setSuggestedDuration(Config.getInstance().getSuggestedDuration(candidate));
+          // candidate.setPlace(place);
+          processedEvent.addCandicates(candidate);
+        }
+      }
+    }
   }
 }

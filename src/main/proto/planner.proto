@@ -27,7 +27,7 @@ message Location {
 }
 
 message TimeZoneResult {
-  optional string time_zone_id = 1;
+  optional string timeZoneId = 1;
 }
 
 message Requirement {

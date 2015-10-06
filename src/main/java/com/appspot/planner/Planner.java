@@ -10,6 +10,7 @@ import com.googlecode.protobuf.format.JsonFormat;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 @Path("plan")
 public class Planner {
@@ -32,10 +33,9 @@ public class Planner {
       return "Invalid request. min_price_level should be less than or equal to max_price_level.";
     }
 
-
-
     // Get time and location
-    Calendar calendar = Calendar.getInstance(GoogleGeoAPI.getTimeZone(request.getRequirement().getStartLoc()));
+    TimeZone timeZone = GoogleGeoAPI.getTimeZone(request.getRequirement().getStartLoc());
+    Calendar calendar = Calendar.getInstance(timeZone);
     if (request.getRequirement().getTimePeriod().getStartTime().hasValue()) {
       calendar.setTimeInMillis(request.getRequirement().getTimePeriod().getStartTime().getValue());
     } else {

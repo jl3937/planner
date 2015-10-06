@@ -4,6 +4,7 @@ import com.appspot.planner.proto.PlannerProtos.*;
 import com.appspot.planner.util.UrlFetcher;
 import com.googlecode.protobuf.format.JsonFormat;
 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -20,6 +21,8 @@ public class GoogleGeoAPI {
     location = getLocation(location);
     UrlFetcher urlFetcher = new UrlFetcher(TIMEZONE_API_URL);
     urlFetcher.addParameter("location", location.getCoordinate().getLat() + "," + location.getCoordinate().getLng());
+    urlFetcher.addParameter("timestamp", Long.toString(Calendar.getInstance().getTimeInMillis() / 1000));
+    urlFetcher.addParameter("key", API_KEY);
     String json = urlFetcher.getResult();
     TimeZoneResult.Builder builder = TimeZoneResult.newBuilder();
     try {
