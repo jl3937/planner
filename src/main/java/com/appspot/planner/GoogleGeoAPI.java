@@ -4,6 +4,7 @@ import com.appspot.planner.proto.PlannerProtos.*;
 import com.appspot.planner.util.UrlFetcher;
 import com.googlecode.protobuf.format.JsonFormat;
 
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 public class GoogleGeoAPI {
@@ -13,6 +14,23 @@ public class GoogleGeoAPI {
   private static final String PLACE_SEARCH_API_URL = "https://maps.googleapis" + "" +
       ".com/maps/api/place/radarsearch/json";
   private static final String PLACE_DETAIL_API_URL = "https://maps.googleapis" + ".com/maps/api/place/details/json";
+  private static final String TIMEZONE_API_URL = "https://maps.googleapis.com/maps/api/timezone/json";
+
+  static public TimeZone getTimeZone(Location location) {
+    location = getLocation(location);
+    UrlFetcher urlFetcher = new UrlFetcher(TIMEZONE_API_URL);
+    urlFetcher.addParameter("location", location.getCoordinate().getLat() + "," + location.getCoordinate().getLng());
+    String json = urlFetcher.getResult();
+    TimeZoneResult.Builder builder = TimeZoneResult.newBuilder();
+    try {
+      JsonFormat.merge(json, builder);
+      TimeZoneResult result = builder.build();
+      return TimeZone.getTimeZone(result.getTimeZoneId());
+    } catch (JsonFormat.ParseException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
 
   static public long getDuration(Location origin, Location destination, String mode) {
     UrlFetcher urlFetcher = new UrlFetcher(DISTANCE_MATRIX_API_URL);

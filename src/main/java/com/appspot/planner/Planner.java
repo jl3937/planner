@@ -33,14 +33,10 @@ public class Planner {
       return "Invalid request. min_price_level should be less than or equal to max_price_level.";
     }
 
+
+
     // Get time and location
-    Calendar calendar;
-    if (request.hasTimeZone()) {
-      calendar = Calendar.getInstance(TimeZone.getTimeZone(request.getTimeZone()));
-    } else {
-      // By default, use system time zone.
-      calendar = Calendar.getInstance();
-    }
+    Calendar calendar = Calendar.getInstance(GoogleGeoAPI.getTimeZone(request.getRequirement().getStartLoc()));
     if (request.getRequirement().getTimePeriod().getStartTime().hasValue()) {
       calendar.setTimeInMillis(request.getRequirement().getTimePeriod().getStartTime().getValue());
     } else {

@@ -26,7 +26,6 @@ public class CandidateCollector {
     }
   }
 
-
   private Event processEvent(Event event, Requirement requirement, Calendar calendar) {
     Location location = requirement.getStartLoc();
     int radius = requirement.hasRadius() ? requirement.getRadius() : DEFAULT_SEARCH_RADIUS;
