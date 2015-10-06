@@ -11,22 +11,24 @@ public class CandidateCollector {
   public static final int LOOKUP_COUNT = 5;
 
   private GetPlanRequest request;
+  private Requirement requirement;
   private GetPlanResponse.Builder response;
   private Calendar calendar;
 
   CandidateCollector(GetPlanRequest request, GetPlanResponse.Builder response, Calendar calendar) {
     this.request = request;
+    this.requirement = request.getRequirement();
     this.response = response;
     this.calendar = calendar;
   }
 
   void collectCandidate() {
     for (Event event : request.getEventList()) {
-      response.addProcessedEvent(processEvent(event, request.getRequirement(), calendar));
+      response.addProcessedEvent(processEvent(event));
     }
   }
 
-  private Event processEvent(Event event, Requirement requirement, Calendar calendar) {
+  private Event processEvent(Event event) {
     Location location = requirement.getStartLoc();
     int radius = requirement.hasRadius() ? requirement.getRadius() : DEFAULT_SEARCH_RADIUS;
     Event.Builder processedEvent = Event.newBuilder().mergeFrom(event);
@@ -47,6 +49,17 @@ public class CandidateCollector {
           break;
         }
         place = GoogleGeoAPI.getPlaceDetail(place.getPlaceId()).getResult();
+        if (place.hasRating() && requirement.hasMinRating() && requirement.getMinRating() > place.getRating()) {
+          continue;
+        }
+        if (place.hasPriceLevel()) {
+          if (requirement.hasMinPriceLevel() && requirement.getMinPriceLevel() > place.getPriceLevel()) {
+            continue;
+          }
+          if (requirement.hasMaxPriceLevel() && requirement.getMaxPriceLevel() < place.getPriceLevel()) {
+            continue;
+          }
+        }
         if (place.hasOpeningHours()) {
           for (Place.OpeningHours.Period period : place.getOpeningHours().getPeriodsList()) {
             int startTime = -1;

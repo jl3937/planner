@@ -10,7 +10,6 @@ import com.googlecode.protobuf.format.JsonFormat;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import java.util.Calendar;
-import java.util.TimeZone;
 
 @Path("plan")
 public class Planner {
