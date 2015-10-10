@@ -20,6 +20,7 @@ public class Scheduler {
   Location endLoc;
   long startTimestamp;
   long endTimestamp;
+  Requirement.TravelMode travelMode;
 
   Scheduler(GetPlanRequest request, GetPlanResponse.Builder response, Calendar calendar) {
     this.request = request;
@@ -34,14 +35,18 @@ public class Scheduler {
       size[i] = response.getProcessedEvent(i).getCandicatesCount();
     }
     startLoc = request.getRequirement().getStartLoc();
-    endLoc = request.getRequirement().hasEndLoc() ? request.getRequirement().getStartLoc() : startLoc;
+    endLoc = request.getRequirement().hasEndLoc() ? request.getRequirement().getEndLoc() : startLoc;
     startLoc = GoogleGeoAPI.getLocation(startLoc);
     endLoc = GoogleGeoAPI.getLocation(endLoc);
     startTimestamp = calendar.getTimeInMillis();
     endTimestamp = request.getRequirement().getTimePeriod().getEndTime().getValue();
+    travelMode = request.getRequirement().getTravelMode();
   }
 
   public GetPlanResponse.Builder getSchedule() {
+    if (startLoc == null || endLoc == null) {
+      return response;
+    }
     for (int i = 0; i < eventCount; ++i) {
       if (size[i] == 0) {
         return response;
@@ -106,8 +111,7 @@ public class Scheduler {
       TimeSlot candidate = event.getCandicates(index[permutation[i]]);
       Location eventLoc = candidate.getSpec().getStartLoc();
       // Add transport
-      long duration = accurate ? GoogleGeoAPI.getDuration(previousLoc, eventLoc, request.getRequirement()
-          .getTravelMode().toString()) : Util.getEstimatedDuration(previousLoc, eventLoc);
+      long duration = getDuration(previousLoc, eventLoc, accurate);
       transportDuration += duration;
       time = addTimeSlot(time, duration, previousLoc, eventLoc, null, schedule);
       // Add event
@@ -129,8 +133,7 @@ public class Scheduler {
         ++priceLevelCount;
       }
     }
-    long duration = accurate ? GoogleGeoAPI.getDuration(previousLoc, endLoc, request.getRequirement().getTravelMode()
-        .toString()) : Util.getEstimatedDuration(previousLoc, endLoc);
+    long duration = getDuration(previousLoc, endLoc, accurate);
     transportDuration += transportDuration;
     time = addTimeSlot(time, duration, previousLoc, endLoc, null, schedule);
     if (endTimestamp > 0 && time > endTimestamp) {
@@ -142,7 +145,7 @@ public class Scheduler {
     // Write summary
     schedule.getSpecBuilder().getTimePeriodBuilder().setStartTime(Util.getTimeFromTimestamp(optimizedStartTimestamp,
         calendar)).setEndTime(Util.getTimeFromTimestamp(time, calendar));
-    transportDuration -= Util.getEstimatedDuration(startLoc, endLoc);
+    transportDuration -= getDuration(startLoc, endLoc, accurate);
     schedule.setTransportDuration(transportDuration);
     schedule.getSpecBuilder().setRating(ratingCount > 0 ? (ratingSum / ratingCount) : 3);
     if (priceLevelCount > 0) {
@@ -156,6 +159,14 @@ public class Scheduler {
       storeStatus(schedule);
     }
     return schedule.build();
+  }
+
+  private long getDuration(Location startLoc, Location endLoc, boolean accurate) {
+    if (accurate) {
+      return GoogleGeoAPI.getDuration(startLoc, endLoc, travelMode);
+    } else {
+      return Util.getEstimatedDuration(startLoc, endLoc, travelMode);
+    }
   }
 
   private long OptimizeSchedule(Schedule.Builder schedule) {

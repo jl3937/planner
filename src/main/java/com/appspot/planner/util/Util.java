@@ -2,8 +2,9 @@ package com.appspot.planner.util;
 
 
 import com.appspot.planner.GoogleGeoAPI;
-import com.appspot.planner.proto.PlannerProtos;
 import com.appspot.planner.proto.PlannerProtos.Location;
+import com.appspot.planner.proto.PlannerProtos.Requirement;
+import com.appspot.planner.proto.PlannerProtos.Time;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -12,7 +13,11 @@ import java.util.concurrent.TimeUnit;
 
 public class Util {
   private static final double EARTH_RADIUS = 6378137;
-  private static final double METERS_PER_MILLI = 0.02;
+  // meters per millisecond
+  private static final double DRIVING_VELOCITY = 72 / 3600.0;  // 72km/h
+  private static final double WALKING_VELOCITY = 5 / 3600.0;  // 5km/h
+  private static final double BICYCLING_VELOCITY = 15 / 3600.0;  // 15km/h
+  private static final double TRANSIT_VELOCITY = 36 / 3600.0;  // 36km/h
 
   private static double rad(double d) {
     return d * Math.PI / 180.0;
@@ -37,12 +42,23 @@ public class Util {
     return s;
   }
 
-  public static long getEstimatedDuration(Location location1, Location location2) {
-    return (long) (getDistance(location1, location2) * 1.414 / METERS_PER_MILLI);
+  public static long getEstimatedDuration(Location location1, Location location2, Requirement.TravelMode travelMode) {
+    double distance = getDistance(location1, location2) * 1.414;
+    switch (travelMode) {
+      case DRIVING:
+        return (long) (distance / DRIVING_VELOCITY);
+      case WALKING:
+        return (long) (distance / WALKING_VELOCITY);
+      case BICYCLING:
+        return (long) (distance / BICYCLING_VELOCITY);
+      case TRANSIT:
+        return (long) (distance / TRANSIT_VELOCITY);
+    }
+    return (long) (distance / DRIVING_VELOCITY);
   }
 
-  public static PlannerProtos.Time getTimeFromTimestamp(long timestamp, Calendar calendar) {
-    PlannerProtos.Time.Builder time = PlannerProtos.Time.newBuilder();
+  public static Time getTimeFromTimestamp(long timestamp, Calendar calendar) {
+    Time.Builder time = Time.newBuilder();
     SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mmaa");
     dateFormat.setTimeZone(calendar.getTimeZone());
     Date date = new Date();
@@ -52,8 +68,7 @@ public class Util {
     return time.build();
   }
 
-  public static PlannerProtos.Time getTimeByHourMinute(int hourMinute, long curTime, int curHourMinute, Calendar
-      calendar) {
+  public static Time getTimeByHourMinute(int hourMinute, long curTime, int curHourMinute, Calendar calendar) {
     long time = curTime + TimeUnit.MILLISECONDS.convert((hourMinute / 100 - curHourMinute / 100), TimeUnit.HOURS) +
         TimeUnit.MILLISECONDS.convert((hourMinute % 100 - curHourMinute % 100), TimeUnit.MINUTES);
     // hourMinute indicates the second day.

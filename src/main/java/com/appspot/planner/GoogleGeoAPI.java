@@ -35,11 +35,11 @@ public class GoogleGeoAPI {
     return null;
   }
 
-  static public long getDuration(Location origin, Location destination, String mode) {
+  static public long getDuration(Location origin, Location destination, Requirement.TravelMode travelMode) {
     UrlFetcher urlFetcher = new UrlFetcher(DISTANCE_MATRIX_API_URL);
     urlFetcher.addParameter("origins", origin.getAddress());
     urlFetcher.addParameter("destinations", destination.getAddress());
-    urlFetcher.addParameter("mode", mode);
+    urlFetcher.addParameter("mode", travelMode.toString());
     urlFetcher.addParameter("key", API_KEY);
     String json = urlFetcher.getResult();
     DistanceMatrixResult.Builder builder = DistanceMatrixResult.newBuilder();
