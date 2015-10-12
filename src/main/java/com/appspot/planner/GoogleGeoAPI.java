@@ -60,11 +60,19 @@ public class GoogleGeoAPI {
   }
 
   static public Location getLocation(Location location) {
-    if (location.hasCoordinate() || !location.hasAddress()) {
+    if (location.hasCoordinate() && !location.getAddress().isEmpty()) {
       return location;
     }
+    if (!location.hasCoordinate() && location.getAddress().isEmpty()) {
+      return null;
+    }
     UrlFetcher urlFetcher = new UrlFetcher(GEOCODE_API_URL);
-    urlFetcher.addParameter("address", location.getAddress());
+    if (!location.getAddress().isEmpty()) {
+      urlFetcher.addParameter("address", location.getAddress());
+    }
+    if (location.hasCoordinate()) {
+      urlFetcher.addParameter("latlng", location.getCoordinate().getLat() + "," + location.getCoordinate().getLng());
+    }
     urlFetcher.addParameter("key", API_KEY);
     String json = urlFetcher.getResult();
     GeocodeResults.Builder builder = GeocodeResults.newBuilder();
@@ -74,8 +82,8 @@ public class GoogleGeoAPI {
       if (results.getResultsCount() == 0) {
         return null;
       }
-      return Location.newBuilder().mergeFrom(location).setCoordinate(results.getResults(0).getGeometry().getLocation
-          ()).build();
+      return Location.newBuilder().setCoordinate(results.getResults(0).getGeometry().getLocation()).setAddress
+          (results.getResults(0).getFormattedAddress()).build();
     } catch (JsonFormat.ParseException e) {
       e.printStackTrace();
     }

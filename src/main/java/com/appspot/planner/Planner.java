@@ -1,6 +1,7 @@
 package com.appspot.planner;
 
 import com.appspot.planner.proto.PlannerProtos.*;
+import com.appspot.planner.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -35,18 +36,7 @@ public class Planner {
 
     // Get time and location
     TimeZone timeZone = GoogleGeoAPI.getTimeZone(request.getRequirement().getStartLoc());
-    Calendar calendar = Calendar.getInstance(timeZone);
-    if (request.getRequirement().getTimePeriod().getStartTime().hasValue()) {
-      calendar.setTimeInMillis(request.getRequirement().getTimePeriod().getStartTime().getValue());
-    } else {
-      /*
-      calendar.set(Calendar.DAY_OF_YEAR, calendar.get(Calendar.DAY_OF_YEAR) + 1);
-      calendar.set(Calendar.HOUR_OF_DAY, 8);
-      calendar.set(Calendar.MINUTE, 0);
-      calendar.set(Calendar.SECOND, 0);
-      calendar.set(Calendar.MILLISECOND, 0);
-      */
-    }
+    Calendar calendar = Util.getCalendarFromTime(request.getRequirement().getTimePeriod().getStartTime(), timeZone);
 
     // Get candidates for each event
     GetPlanResponse.Builder response = GetPlanResponse.newBuilder();

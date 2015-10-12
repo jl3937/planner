@@ -50,8 +50,8 @@ public class CandidateCollector {
         }
         lookupPlace(place.getPlaceId(), dayOfWeek, hourMinute, processedEvent);
       }
-      if (requirement.hasEndLoc() && !requirement.getEndLoc().getAddress().equals(requirement.getStartLoc()
-          .getAddress())) {
+      if (!requirement.getEndLoc().getAddress().equals("") && !requirement.getEndLoc().getAddress().equals
+          (requirement.getStartLoc().getAddress())) {
         lookupCount = 0;
         PlaceResult endPlaceResult = GoogleGeoAPI.searchPlace(event.getContent(), location, radius, event.getType());
         for (Place place : endPlaceResult.getResultsList()) {
@@ -132,7 +132,7 @@ public class CandidateCollector {
           candidate.getSpecBuilder().setRating(place.getRating()).setPriceLevel(place.getPriceLevel());
           candidate.getSpecBuilder().addAllTypes(place.getTypesList());
           candidate.getSpecBuilder().setSuggestedDuration(Config.getInstance().getSuggestedDuration(candidate));
-          // candidate.setPlace(place);
+          candidate.setPlace(place);
           processedEvent.addCandicates(candidate);
         }
       }

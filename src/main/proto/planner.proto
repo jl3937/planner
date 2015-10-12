@@ -78,7 +78,7 @@ message Event {
     MOVIE = 3;
   }
   optional Type type = 2;
-  optional Spec requirement = 3;
+  optional Requirement requirement = 3;
   repeated string avoid = 4;
   repeated TimeSlot candicates = 5;
 }
@@ -126,6 +126,7 @@ message Geometry {
 message GeocodeResults {
   message GeocodeResult {
     optional Geometry geometry = 1;
+    optional string formatted_address = 2;
   }
   repeated GeocodeResult results = 1;
 }
@@ -221,7 +222,7 @@ message Movie {
 }
 
 message Schedule {
-  repeated TimeSlot timeSlot = 1;
+  repeated TimeSlot time_slot = 1;
   optional Spec spec = 2;
   optional int64 transport_duration = 3;
   optional bool tight = 4;

@@ -1,6 +1,296 @@
 <!DOCTYPE html>
+<head>
+    <script>
+        function textToHTML(text) {
+            return ((text || "") + "")  // make sure it is a string;
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\t/g, "    ")
+                .replace(/ /g, "&#8203;&nbsp;&#8203;")
+                .replace(/\r\n|\r|\n/g, "<br />");
+        }
+        function onFocusRow(element) {
+            var templateRow = document.getElementsByClassName('template-row')[0];
+            var focusRow = element.parentNode.parentNode;
+            if (focusRow.nextSibling != templateRow) {
+                return;
+            }
+            insertRow();
+        }
+        function insertRow() {
+            var templateRow = document.getElementsByClassName('template-row')[0];
+            var newRow = templateRow.cloneNode(true);
+            newRow.className = "";
+            newRow.style.display = "";
+            templateRow.parentNode.insertBefore(newRow, templateRow);
+        }
+        function removeRow(element) {
+            var templateRow = document.getElementsByClassName('template-row')[0];
+            var removeRow = element.parentNode.parentNode;
+            if (removeRow.nextSibling == templateRow) {
+                return;
+            }
+            templateRow.parentNode.removeChild(removeRow);
+        }
+        function sendRequest(position) {
+            var request = {};
+            var events = [];
+            var eventRows = document.getElementById('events-table').getElementsByTagName('tr');
+            for (var i = 0; i < eventRows.length; ++i) {
+                var content = eventRows[i].getElementsByClassName('content')[0].value;
+                if (content) {
+                    var event = {};
+                    event["content"] = content;
+                    event["type"] = eventRows[i].getElementsByClassName('type')[0].value;
+                    events.push(event);
+                }
+            }
+            request["event"] = events;
+            var requirement = {};
+            requirement["time_period"] = {};
+            requirement["time_period"]["start_time"] = {};
+            requirement["time_period"]["end_time"] = {};
+            requirement["start_loc"] = {};
+            requirement["end_loc"] = {};
+            requirement["time_period"]["start_time"]["text"] = document.getElementById('start_time').value;
+            requirement["time_period"]["end_time"]["text"] = document.getElementById('end_time').value;
+            requirement["start_loc"]["address"] = document.getElementById('start_loc').value;
+            if (!requirement["start_loc"]["address"] && position) {
+              requirement["start_loc"]["coordinate"] = {};
+              requirement["start_loc"]["coordinate"]["lat"] = position.coords.latitude;
+              requirement["start_loc"]["coordinate"]["lng"] = position.coords.longitude;
+            }
+            requirement["end_loc"]["address"] = document.getElementById('end_loc').value;
+            requirement["radius"] = parseInt(document.getElementById('radius').value);
+            requirement["travel_mode"] = document.getElementById('travel_mode').value;
+            requirement["min_price_level"] = parseInt(document.getElementById('min_price_level').value);
+            requirement["max_price_level"] = parseInt(document.getElementById('max_price_level').value);
+            requirement["min_rating"] = parseInt(document.getElementById('min_rating').value);
+            request["requirement"] = requirement;
+            var json = JSON.stringify(request, null, 4);
+            document.getElementById("request").innerHTML = textToHTML(json);
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (xhttp.readyState == 4 && xhttp.status == 200) {
+                    document.getElementById("response").innerHTML = textToHTML(xhttp.responseText);
+                    var response = JSON.parse(xhttp.responseText);
+                    if (response.hasOwnProperty('schedule')) {
+                        var schedule = response["schedule"];
+                        for (var i = 0; i < schedule["time_slot"].length; ++i) {
+                            var timeSlot = schedule["time_slot"][i];
+                            addTimeSlot(timeSlot);
+                        }
+                    } else {
+                        addTimeSlot();
+                    }
+                }
+                document.getElementById('submit').disabled = false;
+            }
+            xhttp.open("POST", "rest/plan", true);
+            xhttp.send(json);
+        }
+        function getPlan() {
+            document.getElementById("request").innerHTML = "";
+            document.getElementById("response").innerHTML = "";
+            clearTimeSlots();
+            document.getElementById('submit').disabled = true;
+            if (!document.getElementById('start_loc').value) {
+                navigator.geolocation.getCurrentPosition(sendRequest);
+            } else {
+                sendRequest();
+            }
+        }
+        function clearTimeSlots() {
+            var table = document.getElementById('time-slot-table');
+            while (true) {
+                var timeSlots = table.getElementsByTagName('tr');
+                if (timeSlots[0].className != 'template-time-slot') {
+                    timeSlots[0].parentNode.removeChild(timeSlots[0]);
+                } else {
+                    break;
+                }
+            }
+        }
+        function addTimeSlot(timeSlot) {
+            var templateRow = document.getElementsByClassName('template-time-slot')[0];
+            var newRow = templateRow.cloneNode(true);
+            newRow.className = '';
+            newRow.style.display = '';
+            var td = newRow.getElementsByTagName('td')[0];
+            if (!timeSlot) {
+                td.innerHTML = 'No available schedule'
+            } else if (timeSlot["event"]["type"] == "TRANSPORT") {
+                td.style.backgroundColor = '#CCFFCC';
+                var startLoc = timeSlot["spec"]["start_loc"]["address"];
+                var endLoc = timeSlot["spec"]["end_loc"]["address"];
+                td.innerHTML = 'Transport' +
+                    ' <a href=\"https://www.google.com/maps/dir/' + startLoc + "/" + endLoc +
+                    '\" target=\"_blank\">View map</a><br/>' +
+                    'Time: ' + timeSlot["spec"]["time_period"]["start_time"]["text"] +
+                    '-' + timeSlot["spec"]["time_period"]["end_time"]["text"] + '<br/>' +
+                    'Start location: ' + startLoc + '<br/>' +
+                    'End location: ' + endLoc + '<br/>';
+            } else {
+                td.style.backgroundColor = '#FFFFCC';
+                var loc = timeSlot["spec"]["start_loc"]["address"];
+                var detail = (timeSlot["place"] && timeSlot["place"]["website"])
+                    ? (' <a href=\"' + timeSlot["place"]["website"] + '\" target=\"_blank\">Detail</a>')
+                    : '';
+                td.innerHTML = timeSlot["event"]["content"] + detail + '<br/>' +
+                    'Time: ' + timeSlot["spec"]["time_period"]["start_time"]["text"] +
+                    '-' + timeSlot["spec"]["time_period"]["end_time"]["text"] + '<br/>' +
+                    'Location: ' + loc + '<br/>';
+                if (timeSlot["spec"]["rating"]) {
+                    td.innerHTML += 'Rating: ' + timeSlot["spec"]["rating"] + '<br/>';
+                }
+                if (timeSlot["spec"]["price_level"]) {
+                    td.innerHTML += 'Price level: ' + timeSlot["spec"]["price_level"] + '<br/>';
+                }
+            }
+            templateRow.parentNode.insertBefore(newRow, templateRow);
+        }
+
+
+    </script>
+</head>
 <html>
 <body>
-Welcome to Planner RESTful Web Services!
+<h2>Welcome to Planner!</h2>
+
+<form name="form">
+    <h3>Events</h3>
+    <table id="events-table">
+        <tr class="template-row" style="display:none">
+            <td>
+                <input type="text" class="content" onfocus="onFocusRow(this)">
+            </td>
+            <td>
+                <select class="type">
+                    <option value="PLACE">PLACE</option>
+                    <option value="FOOD">FOOD</option>
+                    <option value="MOVIE">MOVIE</option>
+                </select>
+            </td>
+            <td>
+                <a href="#" onclick="removeRow(this)">Remove</a>
+            </td>
+        </tr>
+    </table>
+    <h3>Requirement</h3>
+    <table>
+        <tr>
+            <td>
+                Start time:
+            </td>
+            <td>
+                <input type="text" id="start_time" placeholder="yyyy-MM-dd hh:mm aa">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                End time:
+            </td>
+            <td>
+                <input type="text" id="end_time" placeholder="yyyy-MM-dd hh:mm aa">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Start location:
+            </td>
+            <td>
+                <input type="text" id="start_loc">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                End location:
+            </td>
+            <td>
+                <input type="text" id="end_loc">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Radius (meters):
+            </td>
+            <td>
+                <input type="text" id="radius" value="50000">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Travel mode:
+            </td>
+            <td>
+                <select id="travel_mode">
+                    <option value="DRIVING">Driving</option>
+                    <option value="WALKING">Walking</option>
+                    <option value="BICYCLING">Bicycling</option>
+                    <option value="TARNSIT">Transit</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Min price level:
+            </td>
+            <td>
+                <select id="min_price_level">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Max price level:
+            </td>
+            <td>
+                <select id="max_price_level">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4" selected>4</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Min rating:
+            </td>
+            <td>
+                <select id="min_rating">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+    <input type="button" value="Plan" id="submit" onclick="getPlan()">
+</form>
+<h3>Schedule</h3>
+<table id="time-slot-table" border="1">
+    <tr class="template-time-slot" style="display:none">
+        <td>
+        </td>
+    </tr>
+</table>
+<h3>Request</h3>
+<div id="request"></div>
+<h3>Response</h3>
+<div id="response"></div>
+<script>
+    insertRow();
+
+
+
+</script>
 </body>
 </html>

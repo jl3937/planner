@@ -35,11 +35,14 @@ public class Scheduler {
       size[i] = response.getProcessedEvent(i).getCandicatesCount();
     }
     startLoc = request.getRequirement().getStartLoc();
-    endLoc = request.getRequirement().hasEndLoc() ? request.getRequirement().getEndLoc() : startLoc;
+    endLoc = !request.getRequirement().getEndLoc().getAddress().equals("") ? request.getRequirement().getEndLoc() :
+        startLoc;
     startLoc = GoogleGeoAPI.getLocation(startLoc);
     endLoc = GoogleGeoAPI.getLocation(endLoc);
     startTimestamp = calendar.getTimeInMillis();
-    endTimestamp = request.getRequirement().getTimePeriod().getEndTime().getValue();
+    endTimestamp = request.getRequirement().getTimePeriod().getEndTime().getText().isEmpty() ? 0 : Util
+        .getCalendarFromTime(request.getRequirement().getTimePeriod().getEndTime(), calendar.getTimeZone())
+        .getTimeInMillis();
     travelMode = request.getRequirement().getTravelMode();
   }
 
@@ -302,6 +305,9 @@ public class Scheduler {
       timeSlot.getSpecBuilder().addAllTypes(fromTimeSlot.getSpec().getTypesList());
       timeSlot.getSpecBuilder().setAvailableTimePeriod(fromTimeSlot.getSpec().getTimePeriod());
       timeSlot.getSpecBuilder().setSuggestedDuration(fromTimeSlot.getSpec().getSuggestedDuration());
+      if (fromTimeSlot.hasPlace()) {
+        timeSlot.setPlace(fromTimeSlot.getPlace());
+      }
     } else {
       timeSlot.getEventBuilder().setType(Event.Type.TRANSPORT);
     }

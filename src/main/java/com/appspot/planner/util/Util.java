@@ -6,9 +6,11 @@ import com.appspot.planner.proto.PlannerProtos.Location;
 import com.appspot.planner.proto.PlannerProtos.Requirement;
 import com.appspot.planner.proto.PlannerProtos.Time;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 public class Util {
@@ -76,5 +78,25 @@ public class Util {
       time += TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS);
     }
     return Util.getTimeFromTimestamp(time, calendar);
+  }
+
+  public static Calendar getCalendarFromTime(Time time, TimeZone timeZone) {
+    Calendar calendar = Calendar.getInstance(timeZone);
+    if (time.hasValue()) {
+      calendar.setTimeInMillis(time.getValue());
+      return calendar;
+    }
+    if (time.getText().isEmpty()) {
+      return calendar;
+    }
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm aa");
+    dateFormat.setTimeZone(timeZone);
+    try {
+      Date date = dateFormat.parse(time.getText());
+      calendar.setTime(date);
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
+    return calendar;
   }
 }
