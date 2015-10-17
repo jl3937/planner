@@ -34,11 +34,11 @@ public class CandidateCollector {
     Event.Builder processedEvent = Event.newBuilder().mergeFrom(event);
     int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
     long time = calendar.getTimeInMillis();
+    location = GoogleGeoAPI.getLocation(location);
+    if (location == null) {
+      return null;
+    }
     if (event.getType() == Event.Type.PLACE || event.getType() == Event.Type.FOOD) {
-      location = GoogleGeoAPI.getLocation(location);
-      if (location == null) {
-        return null;
-      }
       int hour = calendar.get(Calendar.HOUR_OF_DAY);
       int minute = calendar.get(Calendar.MINUTE);
       int hourMinute = hour * 100 + minute;

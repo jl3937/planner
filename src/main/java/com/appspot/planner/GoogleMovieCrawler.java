@@ -22,6 +22,9 @@ public class GoogleMovieCrawler {
     UrlFetcher urlFetcher = new UrlFetcher(GOOGLE_MOVIE_URL);
     urlFetcher.addParameter("q", name);
     urlFetcher.addParameter("near", loc.getAddress());
+    if (date < 0) {
+      date += 7;
+    }
     urlFetcher.addParameter("date", String.valueOf(date));
     String result = urlFetcher.getResult();
     Document doc = Jsoup.parse(result);
