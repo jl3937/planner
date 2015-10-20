@@ -45,6 +45,16 @@ public class CandidateCollector {
       int lookupCount = 0;
       PlaceResult startPlaceResult = GoogleGeoAPI.searchPlace(event.getContent(), location, radius, event.getType());
       for (Place place : startPlaceResult.getResultsList()) {
+        boolean avoid = false;
+        for (String avoidId : event.getAvoidIdList()) {
+          if (avoidId.equals(place.getPlaceId())) {
+            avoid = true;
+            break;
+          }
+        }
+        if (avoid) {
+          continue;
+        }
         if (lookupCount++ == LOOKUP_COUNT) {
           break;
         }
@@ -74,7 +84,8 @@ public class CandidateCollector {
           startLocation = GoogleGeoAPI.getLocation(startLocation);
           for (Time startTime : theater.getTimesList()) {
             TimeSlot.Builder candidate = TimeSlot.newBuilder();
-            candidate.getEventBuilder().setContent(theater.getName()).setType(event.getType());
+            candidate.getEventBuilder().setContent(event.getContent()).setType(event.getType()).setResult(theater
+                .getName());
             // candidate.setMovie(movie);
             candidate.getSpecBuilder().setStartLoc(startLocation);
             TimePeriod.Builder timePeriod = candidate.getSpecBuilder().getTimePeriodBuilder();
@@ -126,7 +137,8 @@ public class CandidateCollector {
           TimeSlot.Builder candidate = TimeSlot.newBuilder();
           candidate.getSpecBuilder().getTimePeriodBuilder().setStartTime(Util.getTimeByHourMinute(startTime, time,
               hourMinute, calendar)).setEndTime(Util.getTimeByHourMinute(endTime, time, hourMinute, calendar));
-          candidate.getEventBuilder().setContent(place.getName()).setType(processedEvent.getType());
+          candidate.getEventBuilder().setContent(processedEvent.getContent()).setType(processedEvent.getType())
+              .setResult(place.getName());
           candidate.getSpecBuilder().getStartLocBuilder().setCoordinate(place.getGeometry().getLocation()).setAddress
               (place.getFormattedAddress());
           candidate.getSpecBuilder().setRating(place.getRating()).setPriceLevel(place.getPriceLevel());

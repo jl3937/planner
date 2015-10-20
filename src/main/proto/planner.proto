@@ -79,8 +79,9 @@ message Event {
   }
   optional Type type = 2;
   optional Requirement requirement = 3;
-  repeated string avoid = 4;
+  repeated string avoid_id = 4;
   repeated TimeSlot candicates = 5;
+  optional string result = 6;
 }
 
 message GetPlanRequest {

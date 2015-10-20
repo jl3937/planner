@@ -299,7 +299,7 @@ public class Scheduler {
     }
     if (fromTimeSlot != null) {
       timeSlot.getEventBuilder().setContent(fromTimeSlot.getEvent().getContent()).setType(fromTimeSlot.getEvent()
-          .getType());
+          .getType()).setResult(fromTimeSlot.getEvent().getResult());
       timeSlot.getSpecBuilder().setPriceLevel(fromTimeSlot.getSpec().getPriceLevel()).setRating(fromTimeSlot.getSpec
           ().getRating());
       timeSlot.getSpecBuilder().addAllTypes(fromTimeSlot.getSpec().getTypesList());

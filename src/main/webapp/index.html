@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <head>
     <script>
+        var avoidPlaceIds = [];
+        var avoidContents = [];
         function textToHTML(text) {
             return ((text || "") + "")  // make sure it is a string;
                 .replace(/&/g, "&amp;")
@@ -43,6 +45,12 @@
                     var event = {};
                     event["content"] = content;
                     event["type"] = eventRows[i].getElementsByClassName('type')[0].value;
+                    event["avoid_id"] = [];
+                    for (var j = 0; j < avoidContents.length; ++j) {
+                        if (content == avoidContents[j]) {
+                            event["avoid_id"].push(avoidPlaceIds[j]);
+                        }
+                    }
                     events.push(event);
                 }
             }
@@ -101,6 +109,11 @@
                 sendRequest();
             }
         }
+        function onClickPlan() {
+            avoidContents = [];
+            avoidPlaceIds = [];
+            getPlan();
+        }
         function clearTimeSlots() {
             var table = document.getElementById('time-slot-table');
             while (true) {
@@ -135,9 +148,11 @@
                 td.style.backgroundColor = '#FFFFCC';
                 var loc = timeSlot["spec"]["start_loc"]["address"];
                 var detail = (timeSlot["place"] && timeSlot["place"]["website"])
-                    ? (' <a href=\"' + timeSlot["place"]["website"] + '\" target=\"_blank\">Detail</a>')
+                    ? (' <a href=\"' + timeSlot["place"]["website"] + '\" target=\"_blank\">Detail</a>' +
+                       ' <input type=\"button\" value=\"Avoid\" onclick=\"onClickAvoid(\'' +
+                       timeSlot["place"]["place_id"] + '\', \'' + timeSlot["event"]["content"] + '\')\">')
                     : '';
-                td.innerHTML = timeSlot["event"]["content"] + detail + '<br/>' +
+                td.innerHTML = timeSlot["event"]["result"] + detail + '<br/>' +
                     'Time: ' + timeSlot["spec"]["time_period"]["start_time"]["text"] +
                     '-' + timeSlot["spec"]["time_period"]["end_time"]["text"] + '<br/>' +
                     'Location: ' + loc + '<br/>';
@@ -151,6 +166,11 @@
             templateRow.parentNode.insertBefore(newRow, templateRow);
         }
 
+        function onClickAvoid (placeId, content) {
+            avoidPlaceIds.push(placeId);
+            avoidContents.push(content);
+            getPlan();
+        }
 
     </script>
 </head>
@@ -273,10 +293,10 @@
             </td>
         </tr>
     </table>
-    <input type="button" value="Plan" id="submit" onclick="getPlan()">
+    <input type="button" value="Plan" id="submit" onclick="onClickPlan()">
 </form>
 <h3>Schedule</h3>
-<table id="time-slot-table" border="1">
+<table id="time-slot-table">
     <tr class="template-time-slot" style="display:none">
         <td>
         </td>
