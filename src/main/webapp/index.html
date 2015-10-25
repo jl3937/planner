@@ -93,6 +93,7 @@
                         addTimeSlot();
                     }
                 }
+                document.getElementById("planning").innerHTML = " ";
                 document.getElementById('submit').disabled = false;
             }
             xhttp.open("POST", "rest/plan", true);
@@ -101,6 +102,7 @@
         function getPlan() {
             document.getElementById("request").innerHTML = "";
             document.getElementById("response").innerHTML = "";
+            document.getElementById("planning").innerHTML = "Planning ...";
             clearTimeSlots();
             document.getElementById('submit').disabled = true;
             if (!document.getElementById('start_loc').value) {
@@ -295,6 +297,7 @@
     </table>
     <input type="button" value="Plan" id="submit" onclick="onClickPlan()">
 </form>
+<div id="planning"> </div>
 <h3>Schedule</h3>
 <table id="time-slot-table">
     <tr class="template-time-slot" style="display:none">
